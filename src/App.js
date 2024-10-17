@@ -50,8 +50,8 @@ function App() {
     const initAppID = async () => {
       try {
         await appID.init({
-          clientId: '<a1aecd93-e29f-4359-8dc0-953460f71acd>',
-          discoveryEndpoint: '<https://eu-de.appid.cloud.ibm.com/oauth/v4/facad6f3-96d0-4451-beda-e2b7dbc2df61/.well-known/openid-configuration>'
+          clientId: 'a1aecd93-e29f-4359-8dc0-953460f71acd',
+          discoveryEndpoint: 'https://eu-de.appid.cloud.ibm.com/oauth/v4/facad6f3-96d0-4451-beda-e2b7dbc2df61/.well-known/openid-configuration'
         });
         setIsAppIDInitialized(true);
       } catch (e) {
