@@ -17,7 +17,7 @@ const ManagementDetails = () => {
   useEffect(() => {
     const fetchDetailsData = async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:3001/api/management/details/${databaseName}`);
+        const response = await fetch(process.env.REACT_APP_API_URL +  `/api/management/details/${databaseName}`);
         const data = await response.json();
         setDetailsData(data);
       } catch (error) {

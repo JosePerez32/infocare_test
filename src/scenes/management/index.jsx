@@ -15,7 +15,7 @@ const Management = () => {
   useEffect(() => {
     const fetchDatabaseData = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:3001/api/databases"); // Fetch actual databases
+        const response = await fetch(process.env.REACT_APP_API_URL + "/api/databases"); // Fetch actual databases
         const data = await response.json();
         
         // Populate gauge data with the fetched database names

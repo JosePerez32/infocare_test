@@ -44,13 +44,14 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userName, setUserName] = useState('');
   const [isAppIDInitialized, setIsAppIDInitialized] = useState(false);
+  const [accessToken, setAccessToken] = useState(null);  
 
   useEffect(() => {
     const initAppID = async () => {
       try {
         await appID.init({
-          clientId: 'a1aecd93-e29f-4359-8dc0-953460f71acd',
-          discoveryEndpoint: 'https://eu-de.appid.cloud.ibm.com/oauth/v4/facad6f3-96d0-4451-beda-e2b7dbc2df61/.well-known/openid-configuration'
+          clientId: '<a1aecd93-e29f-4359-8dc0-953460f71acd>',
+          discoveryEndpoint: '<https://eu-de.appid.cloud.ibm.com/oauth/v4/facad6f3-96d0-4451-beda-e2b7dbc2df61/.well-known/openid-configuration>'
         });
         setIsAppIDInitialized(true);
       } catch (e) {
@@ -73,12 +74,15 @@ function App() {
       setErrorState(false);
       setIsAuthenticated(true);
       setUserName(tokens.idTokenPayload.name);
+      setAccessToken(tokens.accessToken);  
+      localStorage.setItem('accessToken', tokens.accessToken);
+      alert(tokens.accessToken);
+      console.log("Access token:", tokens.accessToken);     
     } catch (e) {
       setErrorState(true);
       setErrorMessage('Login failed: ' + e.message);
     }
   };
-
   if (!isAuthenticated) {
     return (
       <div className="App">
@@ -109,7 +113,7 @@ function App() {
               <h2>Welcome, {userName}!</h2>
             </div>
             <Routes>
-              <Route path="/" element={<Dashboard />} />
+              <Route path="/" element={<Dashboard accessToken={accessToken} />} /> {/* Pass token to Dashboard */}
               <Route path="/management" element={<Management />} />
               <Route path="/management/details/:databaseName" element={<ManagementDetails />} />
               <Route path="/management/details/:databaseName/responsiveness" element={<Responsiveness />} />

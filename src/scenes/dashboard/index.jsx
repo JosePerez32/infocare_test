@@ -1,13 +1,37 @@
-import { Box, useTheme, Typography, Card, CardContent, CardHeader } from "@mui/material"; 
+import { useEffect } from "react";
+import { Box, useTheme, Typography, Card, CardContent, CardHeader } from "@mui/material";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import HandshakeIcon from '@mui/icons-material/Handshake';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import MoreTimeIcon from '@mui/icons-material/MoreTime';
 
-const Dashboard = () => {
+const Dashboard = ({ accessToken }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      const t = localStorage.getItem('accessToken');
+      console.log("Access Token:", t);
+      if (t) {
+        try {
+          const response = await fetch( process.env.REACT_APP_API_URL + '/userinfo', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${accessToken}`, // Use the access token
+            },
+          });
+          const data = await response.json();
+          console.log("User Info:", data);
+        } catch (error) {
+          console.error("Error fetching user info:", error);
+        }
+      }
+    };
+    
+    fetchUserInfo();
+  }, [accessToken]); // Call the API whenever accessToken changes
 
   return (
     <Box m="20px">
