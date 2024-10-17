@@ -1,5 +1,8 @@
-import { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
+import AppID from 'ibmcloud-appid-js';
+import { CssBaseline, ThemeProvider } from "@mui/material";
+import { ColorModeContext, useMode } from "./theme";
 import Topbar from "./scenes/global/Topbar";
 import Sidebar from "./scenes/global/Sidebar";
 import Dashboard from "./scenes/dashboard";
@@ -28,13 +31,71 @@ import ResponsivenessMemory from './scenes/management/responsiveness_memory';
 import ResponsivenessSpace from './scenes/management/responsiveness_space';
 import ResponsivenessSpeed from './scenes/management/responsiveness_speed';
 import ResponsivenessReadyness from './scenes/management/responsiveness_readyness';
-import { CssBaseline, ThemeProvider } from "@mui/material";
-import { ColorModeContext, useMode } from "./theme";
 import Calendar from "./scenes/calendar/calendar";
 
 function App() {
   const [theme, colorMode] = useMode();
   const [isSidebar, setIsSidebar] = useState(true);
+
+  // AppID Authentication
+  const appID = useMemo(() => new AppID(), []);
+  const [errorState, setErrorState] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [isAppIDInitialized, setIsAppIDInitialized] = useState(false);
+
+  useEffect(() => {
+    const initAppID = async () => {
+      try {
+        await appID.init({
+          clientId: 'a1aecd93-e29f-4359-8dc0-953460f71acd',
+          discoveryEndpoint: 'https://eu-de.appid.cloud.ibm.com/oauth/v4/facad6f3-96d0-4451-beda-e2b7dbc2df61/.well-known/openid-configuration'
+        });
+        setIsAppIDInitialized(true);
+      } catch (e) {
+        setErrorState(true);
+        setErrorMessage('Failed to initialize AppID: ' + e.message);
+      }
+    };
+    initAppID();
+  }, [appID]);
+
+  const loginAction = async () => {
+    if (!isAppIDInitialized) {
+      setErrorState(true);
+      setErrorMessage('AppID is not initialized yet. Please try again in a moment.');
+      return;
+    }
+
+    try {
+      const tokens = await appID.signin();
+      setErrorState(false);
+      setIsAuthenticated(true);
+      setUserName(tokens.idTokenPayload.name);
+    } catch (e) {
+      setErrorState(true);
+      setErrorMessage('Login failed: ' + e.message);
+    }
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="App">
+        <header className="App-header">
+          <h1>Welcome to Infocare</h1>
+          <button 
+            style={{fontSize: '24px', backgroundColor: 'skyblue', border: 'none', cursor: 'pointer'}} 
+            onClick={loginAction}
+            disabled={!isAppIDInitialized}
+          >
+            {isAppIDInitialized ? 'Login' : 'Initializing...'}
+          </button>
+          {errorState && <div style={{color: 'red'}}>{errorMessage}</div>}
+        </header>
+      </div>
+    );
+  }
 
   return (
     <ColorModeContext.Provider value={colorMode}>
@@ -44,6 +105,9 @@ function App() {
           <Sidebar isSidebar={isSidebar} />
           <main className="content">
             <Topbar setIsSidebar={setIsSidebar} />
+            <div style={{padding: '20px'}}>
+              <h2>Welcome, {userName}!</h2>
+            </div>
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/management" element={<Management />} />
@@ -67,7 +131,7 @@ function App() {
               <Route path="/technical/details/:databaseName/availability" element={<Availability />} />
               <Route path="/technical/details/:databaseName/efficiency" element={<Efficiency />} />
               <Route path="/technical/details/:databaseName/organization" element={<Organization />} />
-              <Route path="/technical/details/details/:databaseName/technical_recover" element={<Recover/>} />
+              <Route path="/technical/details/:databaseName/technical_recover" element={<Recover/>} />
               <Route path="/users" element={<Users />} />
               <Route path="/form" element={<Form />} />
               <Route path="/faq" element={<FAQ />} />
