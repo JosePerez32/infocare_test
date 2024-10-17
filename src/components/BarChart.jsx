@@ -106,16 +106,28 @@ const BarChart = ({ data, isCustomLineColors = false, isDashboard = false, yAxis
         from: "color",
         modifiers: [["darker", 1.6]],
       }}
+      tooltip={({ id, value, indexValue }) => (
+        <div
+          style={{
+            padding: "5px 10px",
+            background: colors.primary[500],
+            color: "white",
+            borderRadius: "3px",
+          }}
+        >
+          <strong>{indexValue}</strong>: {value}
+        </div>
+      )}
       legends={[
         {
           dataFrom: "keys",
-          anchor: "bottom-right",
-          direction: "column",
+          anchor: "top",
+          direction: "row", // Change direction to row to align items horizontally
           justify: false,
-          translateX: 120,
-          translateY: 0,
-          itemsSpacing: 2,
-          itemWidth: 100,
+          translateX: 0, // Center the legend horizontally
+          translateY: -40, // Move the legend upwards
+          itemsSpacing: 10, // Increase spacing between items
+          itemWidth: 80,
           itemHeight: 20,
           itemDirection: "left-to-right",
           itemOpacity: 0.85,

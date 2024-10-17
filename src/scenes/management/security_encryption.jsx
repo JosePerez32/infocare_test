@@ -3,35 +3,27 @@ import { Box } from "@mui/material";
 import Header from "../../components/Header";
 import BarChart from "../../components/BarChart";
 
-const ResponsivenessMemory = ({ databaseName }) => {
+const SecurityEncryption = ({ databaseName }) => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `http://127.0.0.1:3001/api/management/memory/${databaseName}`
+          `http://127.0.0.1:3001/api/management/security/encryption/${databaseName}`
         );
         const result = await response.json();
 
         const transformedData = [
           {
-            id: "Forced Disk",
-            data: result.memory.forced_disk_data,
-          },
-          {
-            id: "Sort Swaps",
-            data: result.memory.swap_data,
-          },
-          {
-            id: "Unused",
-            data: result.memory.unused_memory_data,
+            id: "Encryption",
+            data: result.encryption.encryption_data,
           },
         ];
 
         setData(transformedData);
       } catch (error) {
-        console.error("Error fetching memory data:", error);
+        console.error("Error fetching security data:", error);
       }
     };
 
@@ -40,12 +32,12 @@ const ResponsivenessMemory = ({ databaseName }) => {
 
   return (
     <Box m="20px">
-      <Header title="Memory Overview" />
+      <Header title="Security Encryption" />
       <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap="10px">
         {data.map((chartData, index) => (
           <Box key={index} height="40vh" width="100%">
             <BarChart
-              data={[chartData]}
+              data={[chartData]}             
             />
           </Box>
         ))}
@@ -54,4 +46,4 @@ const ResponsivenessMemory = ({ databaseName }) => {
   );
 };
 
-export default ResponsivenessMemory;
+export default SecurityEncryption;

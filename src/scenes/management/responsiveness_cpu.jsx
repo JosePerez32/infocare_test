@@ -55,8 +55,6 @@ const Line = ({ databaseName }) => {
           <Box key={index} height="40vh" width="40vw">
             <LineChart
               data={[chartData]} // Passing each chart's data as an array
-              yAxisLegend={chartData.id} // Using chart ID as y-axis legend
-              xAxisLegend="Time" // Common x-axis legend
             />
           </Box>
         ))}

@@ -1,26 +1,35 @@
-    import { Box, useTheme, Typography } from "@mui/material";
+import { Box, useTheme, Typography } from "@mui/material";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import GaugeComponent from "react-gauge-component";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 const Security = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const { databaseName } = useParams(); // Get the database name from URL params
-  const [encryptionData, setEncryptionData] = useState(null);
-  const [usersData, setUsersData] = useState(null);
-  const [maskingData, setMaskingData] = useState(null);
+  const navigate = useNavigate();
+
+  const [securityData, setSecurityData] = useState({
+    encryption: 0,
+    users: 0,
+    masking: 0,
+    
+  });
+
 
   useEffect(() => {
     const fetchSecurityData = async () => {
       try {
         const response = await fetch(`http://127.0.0.1:3001/api/security/${databaseName}`);
         const data = await response.json();
-        setEncryptionData(data.security.encryption);
-        setUsersData(data.security.users);
-        setMaskingData(data.security.masking);
+        setSecurityData({
+          encryption: data.security.encryption,
+          users: data.security.users,
+          masking: data.security.masking,
+         
+        });
       } catch (error) {
         console.error("Error fetching security data:", error);
       }
@@ -36,87 +45,40 @@ const Security = () => {
     return () => clearInterval(interval);
   }, [databaseName]); // Re-run if databaseName changes
 
+  const SecurityBox = ({ title, value, route }) => (
+    <Box
+      onClick={() => navigate(`/management/details/${databaseName}/security/${route}`)}
+      style={{
+        cursor: "pointer",
+        backgroundColor: colors.primary[400],
+        padding: "20px",
+        borderRadius: "8px"
+      }}
+    >
+      <Typography variant="h6" color={colors.grey[100]}>
+        {title}
+      </Typography>
+      <GaugeComponent
+        value={value}
+        type="radial"
+        arc={{
+          colorArray: [ '#EA4228' ,'#5BE12C'],
+          subArcs: [{ limit: 10 }, { limit: 30 }, {}, {}, {}],
+          padding: 0.02,
+          width: 0.3
+        }}
+      />
+    </Box>
+  );
+
   return (
     <Box m="20px">
-      <Header title={`Security for ${databaseName}`} subtitle="Security" />
+      <Header title={`Security Details for ${databaseName}`} subtitle="Overall Security" />
       <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap="20px">
-        <Box
-          style={{
-            backgroundColor: colors.primary[400],
-            padding: "20px",
-            borderRadius: "8px",
-          }}
-        >
-          <Typography variant="h6" color={colors.grey[100]}>
-            Encryption
-          </Typography>
-          {encryptionData !== null ? ( // Only render GaugeComponent if data is available
-            <GaugeComponent
-              value={encryptionData}
-              type="radial"
-              arc={{
-                colorArray: ["#5BE12C", "#EA4228"],
-                subArcs: [{ limit: 10 }, { limit: 30 }, {}, {}, {}],
-                padding: 0.02,
-                width: 0.3,
-              }}
-            />
-          ) : (
-            <Typography color={colors.grey[100]}>Loading...</Typography>
-          )}
-        </Box>
-
-        <Box
-          style={{
-            backgroundColor: colors.primary[400],
-            padding: "20px",
-            borderRadius: "8px",
-          }}
-        >
-          <Typography variant="h6" color={colors.grey[100]}>
-            Users
-          </Typography>
-          {usersData !== null ? ( // Only render GaugeComponent if data is available
-            <GaugeComponent
-              value={usersData}
-              type="radial"
-              arc={{
-                colorArray: ["#5BE12C", "#EA4228"],
-                subArcs: [{ limit: 10 }, { limit: 30 }, {}, {}, {}],
-                padding: 0.02,
-                width: 0.3,
-              }}
-            />
-          ) : (
-            <Typography color={colors.grey[100]}>Loading...</Typography>
-          )}
-        </Box>
-
-        <Box
-          style={{
-            backgroundColor: colors.primary[400],
-            padding: "20px",
-            borderRadius: "8px",
-          }}
-        >
-          <Typography variant="h6" color={colors.grey[100]}>
-            Masking
-          </Typography>
-          {maskingData !== null ? ( // Only render GaugeComponent if data is available
-            <GaugeComponent
-              value={maskingData}
-              type="radial"
-              arc={{
-                colorArray: ["#5BE12C", "#EA4228"],
-                subArcs: [{ limit: 10 }, { limit: 30 }, {}, {}, {}],
-                padding: 0.02,
-                width: 0.3,
-              }}
-            />
-          ) : (
-            <Typography color={colors.grey[100]}>Loading...</Typography>
-          )}
-        </Box>
+        <SecurityBox title="Encryption" value={securityData.encryption} route="encryption" />
+        <SecurityBox title="Masking" value={securityData.masking} route="masking" />
+        <SecurityBox title="Users" value={securityData.users} route="users" />
+        
       </Box>
     </Box>
   );

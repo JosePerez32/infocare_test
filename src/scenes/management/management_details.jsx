@@ -1,87 +1,112 @@
-import { Box, useTheme, Typography } from "@mui/material";
+import { Box, useTheme, Typography, Alert } from "@mui/material";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import GaugeComponent from "react-gauge-component";
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // Import useNavigate
+import { useParams, useNavigate } from "react-router-dom";
 
 const ManagementDetails = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const { databaseName } = useParams(); // Get the database name from URL params
-  const navigate = useNavigate(); // Initialize the navigate function
-  const [recoveryData, setRecoveryData] = useState(null);
+  const { databaseName } = useParams();
+  const navigate = useNavigate();
+  const [detailsData, setDetailsData] = useState(null);
+  const [gaugeOrder, setGaugeOrder] = useState(["responsiveness", "security", "recovery"]);
+  const [alertVisible, setAlertVisible] = useState(false);
 
   useEffect(() => {
-    const fetchRecoveryData = async () => {
+    const fetchDetailsData = async () => {
       try {
         const response = await fetch(`http://127.0.0.1:3001/api/management/details/${databaseName}`);
         const data = await response.json();
-        setRecoveryData(data.recovery);
+        setDetailsData(data);
       } catch (error) {
-        console.error("Error fetching recovery data:", error);
+        console.error("Error fetching details data:", error);
       }
     };
 
-    fetchRecoveryData();
+    const savedOrder = localStorage.getItem(`gaugeOrder_${databaseName}`);
+    if (savedOrder) {
+      setGaugeOrder(JSON.parse(savedOrder));
+    }
+
+    fetchDetailsData();
   }, [databaseName]);
 
-  if (!recoveryData) return <Typography>Loading...</Typography>;
+  const handleBoxClick = (route) => {
+    navigate(`/management/details/${databaseName}/${route}`);
+  };
+
+  const handleDragStart = (index) => {
+    return (event) => {
+      event.dataTransfer.setData("text/plain", index);
+    };
+  };
+
+  const handleDrop = (index) => {
+    return (event) => {
+      event.preventDefault();
+      const fromIndex = event.dataTransfer.getData("text/plain");
+      const newOrder = [...gaugeOrder];
+      const [movedItem] = newOrder.splice(fromIndex, 1);
+      newOrder.splice(index, 0, movedItem);
+      setGaugeOrder(newOrder);
+      localStorage.setItem(`gaugeOrder_${databaseName}`, JSON.stringify(newOrder));
+      setAlertVisible(true);
+      setTimeout(() => setAlertVisible(false), 3000); // Hide alert after 3 seconds
+    };
+  };
+
+  const handleDragOver = (event) => {
+    event.preventDefault(); // Allow the drop
+  };
+
+  const GaugeBox = ({ title, value, route, index }) => (
+    <Box
+      draggable
+      onDragStart={handleDragStart(index)}
+      onDrop={handleDrop(index)}
+      onDragOver={handleDragOver}
+      onClick={() => handleBoxClick(route)}
+      style={{
+        cursor: "pointer",
+        backgroundColor: colors.primary[400],
+        padding: "20px",
+        borderRadius: "8px",
+      }}
+    >
+      <Typography variant="h6" color={colors.grey[100]}>
+        {title}
+      </Typography>
+      <GaugeComponent
+        value={value}
+        type="radial"
+        arc={{
+          colorArray: ['#5BE12C', '#EA4228'],
+          subArcs: [{ limit: 10 }, { limit: 30 }, {}, {}, {}],
+          padding: 0.02,
+          width: 0.3
+        }}
+      />
+    </Box>
+  );
+
+  if (!detailsData) return <Typography>Loading...</Typography>;
 
   return (
     <Box m="20px">
-      <Header title={`Details for ${recoveryData.database}`} subtitle="Details" />
+      <Header title={`Details for ${databaseName}`} subtitle="Details" />
+      {alertVisible && <Alert variant="outlined"  severity="success">Gauge chart order changed and saved</Alert>}
       <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap="20px">
-        <Box
-          onClick={() => navigate(`/responsiveness/${databaseName}`)} // Navigate to Responsiveness component
-          style={{ cursor: "pointer", backgroundColor: colors.primary[400], padding: "20px", borderRadius: "8px" }} // Change background color, padding, and border radius
-        >
-          <Typography variant="h6" color={colors.grey[100]}>
-            Responsiveness
-          </Typography>
-          <GaugeComponent
-            value={recoveryData.responsiveness}
-            type="radial"
-            arc={{
-              colorArray: ['#5BE12C', '#EA4228'],
-              subArcs: [{ limit: 10 }, { limit: 30 }, {}, {}, {}],
-              padding: 0.02,
-              width: 0.3
-            }}
+        {gaugeOrder.map((gauge, index) => (
+          <GaugeBox
+            key={gauge}
+            title={gauge.charAt(0).toUpperCase() + gauge.slice(1)} // Capitalize the first letter
+            value={detailsData[gauge]}
+            route={gauge}
+            index={index} // Pass index to GaugeBox
           />
-        </Box>
-        <Box  onClick={() => navigate(`/security/${databaseName}`)} style={{             cursor: "pointer",
-backgroundColor: colors.primary[400], padding: "20px", borderRadius: "8px" }}>
-          <Typography variant="h6" color={colors.grey[100]}>
-            Security
-          </Typography>
-          <GaugeComponent
-            value={recoveryData.security}
-            type="radial"
-            arc={{
-              colorArray: ['#5BE12C', '#EA4228'],
-              subArcs: [{ limit: 10 }, { limit: 30 }, {}, {}, {}],
-              padding: 0.02,
-              width: 0.3
-            }}
-          />
-        </Box>
-        <Box onClick={() => navigate(`/recovery/${databaseName}`)} // Navigate to Responsiveness component
-        style={{ backgroundColor: colors.primary[400], padding: "20px", borderRadius: "8px" }}>
-          <Typography variant="h6" color={colors.grey[100]}>
-            Recovery
-          </Typography>
-          <GaugeComponent
-            value={recoveryData.recovery}
-            type="radial"
-            arc={{
-              colorArray: ['#5BE12C', '#EA4228'],
-              subArcs: [{ limit: 10 }, { limit: 30 }, {}, {}, {}],
-              padding: 0.02,
-              width: 0.3
-            }}
-          />
-        </Box>
+        ))}
       </Box>
     </Box>
   );
