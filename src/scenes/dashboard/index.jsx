@@ -13,10 +13,9 @@ const Dashboard = ({ accessToken }) => {
   useEffect(() => {
     const fetchUserInfo = async () => {
       const t = localStorage.getItem('accessToken');
-      console.log("Access Token:", t);
       if (t) {
         try {
-          const response = await fetch( process.env.REACT_APP_API_URL + '/userinfo', {
+          const response = await fetch(process.env.REACT_APP_API_URL + '/userinfo', {
             method: 'GET',
             headers: {
               'Authorization': `Bearer ${accessToken}`, // Use the access token
@@ -24,14 +23,19 @@ const Dashboard = ({ accessToken }) => {
           });
           const data = await response.json();
           console.log("User Info:", data);
+
+          // Store organization in localStorage
+          if (data.organisation) {
+            localStorage.setItem('organization', data.organisation);
+          }
         } catch (error) {
           console.error("Error fetching user info:", error);
         }
       }
     };
-    
+
     fetchUserInfo();
-  }, [accessToken]); // Call the API whenever accessToken changes
+  }, [accessToken]);
 
   return (
     <Box m="20px">

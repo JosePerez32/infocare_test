@@ -1,40 +1,50 @@
-import React from 'react';
-import { Box, IconButton, useTheme } from "@mui/material";
-import { useContext } from "react";
+import React, { useContext } from 'react';
+import {
+  AppBar,
+  Toolbar,
+  IconButton,
+  Typography,
+  Box,
+  Avatar,
+  useTheme,
+  Tooltip,
+  Chip,
+  Breadcrumbs
+} from "@mui/material";
 import { ColorModeContext } from "../../theme";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import Breadcrumbs from '@mui/material/Breadcrumbs';
-import Typography from '@mui/material/Typography';
-import Link from '@mui/material/Link';
 import { useLocation, Link as RouterLink } from 'react-router-dom';
+import { tokens } from "../../theme";
+import Link from '@mui/material/Link';
 
-const Topbar = () => {
+const Topbar = ({ userName, setIsSidebar }) => {
   const theme = useTheme();
   const colorMode = useContext(ColorModeContext);
+  const colors = tokens(theme.palette.mode);
   const location = useLocation();
-
-  const pathnames = location.pathname.split('/').filter((x) => x);
 
   const breadcrumbNameMap = {
     '/': 'Home',
-    'dashboard': 'Dashboard',
-    'management': 'Management',
-    'technical': 'Technical',
-    'invoices': 'Invoices',
-    'form': 'Form',
-    'faq': 'FAQ',
-    'calendar': 'Calendar',
-    'responsiveness': 'Responsiveness',
-    'cpu': 'CPU',
-    'memory': 'Memory',
-    'space': 'Space',
-    'speed': 'Speed',
-    'readiness': 'Readiness',
-    'security': 'Security',
-    'recovery': 'Recovery',
+    '/dashboard': 'Dashboard',
+    '/management': 'Management',
+    '/technical': 'Technical',
+    '/invoices': 'Invoices',
+    '/form': 'Form',
+    '/faq': 'FAQ',
+    '/calendar': 'Calendar',
+    '/responsiveness': 'Responsiveness',
+    '/cpu': 'CPU',
+    '/memory': 'Memory',
+    '/space': 'Space',
+    '/speed': 'Speed',
+    '/readiness': 'Readiness',
+    '/security': 'Security',
+    '/recovery': 'Recovery',
   };
+
+  const pathnames = location.pathname.split('/').filter((x) => x);
 
   const getBreadcrumbName = (pathname, part, index, parts) => {
     if (part.startsWith('details/')) {
@@ -71,48 +81,75 @@ const Topbar = () => {
   const combinedPathnames = getCombinedBreadcrumbs();
 
   return (
-    <Box display="flex" justifyContent="space-between" p={4} >
-      {/* BREADCRUMBS */}
-      <Breadcrumbs aria-label="breadcrumb">
-        <Link component={RouterLink} underline="hover" color="inherit" to="/">
-          {breadcrumbNameMap['/']}
-        </Link>
-        {combinedPathnames.map((value, index) => {
-          const last = index === combinedPathnames.length - 1;
-          const to = getLinkTo(index, combinedPathnames);
-
-          return last ? (
-            <Typography color="text.primary" key={to}>
-              {getBreadcrumbName(location.pathname, value, index, combinedPathnames)}
-            </Typography>
-          ) : (
-            <Link
-              component={RouterLink}
-              underline="hover"
-              color="inherit"
-              to={to}
-              key={to}
-            >
-              {getBreadcrumbName(location.pathname, value, index, combinedPathnames)}
+    <AppBar 
+      position="static" 
+      color="default" 
+      elevation={20}
+      sx={{
+        background: `${colors.primary[400]} !important`,
+        color: theme.palette.text.primary,
+      }}
+    >
+      <Toolbar sx={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+          <Breadcrumbs aria-label="breadcrumb" sx={{ flexGrow: 1 }}>
+            <Link component={RouterLink} underline="hover" color="inherit" to="/">
+              {breadcrumbNameMap['/']}
             </Link>
-          );
-        })}
-      </Breadcrumbs>
+            {combinedPathnames.map((value, index) => {
+              const last = index === combinedPathnames.length - 1;
+              const to = getLinkTo(index, combinedPathnames);
 
-      {/* ICONS */}
-      <Box display="flex">
-        <IconButton onClick={colorMode.toggleColorMode}>
-          {theme.palette.mode === "dark" ? (
-            <DarkModeOutlinedIcon />
-          ) : (
-            <LightModeOutlinedIcon />
+              return last ? (
+                <Typography color="text.primary" key={to}>
+                  {getBreadcrumbName(location.pathname, value, index, combinedPathnames)}
+                </Typography>
+              ) : (
+                <Link
+                  component={RouterLink}
+                  underline="hover"
+                  color="inherit"
+                  to={to}
+                  key={to}
+                >
+                  {getBreadcrumbName(location.pathname, value, index, combinedPathnames)}
+                </Link>
+              );
+            })}
+          </Breadcrumbs>
+        </Box>
+        
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          
+          <Tooltip title="Toggle color mode">
+            <IconButton onClick={colorMode.toggleColorMode} color="inherit">
+              {theme.palette.mode === "dark" ? <LightModeOutlinedIcon /> : <DarkModeOutlinedIcon />}
+            </IconButton>
+          </Tooltip>
+          
+          <Tooltip title="Settings">
+            <IconButton color="inherit">
+              <SettingsOutlinedIcon />
+            </IconButton>
+          </Tooltip>
+          
+          {userName && (
+            <Chip
+              avatar={<Avatar sx={{ bgcolor: theme.palette.primary.main }}>{userName.charAt(0).toUpperCase()}</Avatar>}
+              label={userName}
+              variant="outlined"
+              sx={{
+                ml: 2,
+                borderColor: 'transparent',
+                '& .MuiChip-label': {
+                  color: theme.palette.text.primary,
+                },
+              }}
+            />
           )}
-        </IconButton>       
-        <IconButton>
-          <SettingsOutlinedIcon />
-        </IconButton>
-      </Box>
-    </Box>
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 };
 

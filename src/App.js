@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import AppID from 'ibmcloud-appid-js';
-import { CssBaseline, ThemeProvider } from "@mui/material";
+import { CssBaseline, ThemeProvider, Button, Typography, Box, AppBar, Toolbar, Container } from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
 import Topbar from "./scenes/global/Topbar";
 import Sidebar from "./scenes/global/Sidebar";
@@ -76,28 +76,44 @@ function App() {
       setUserName(tokens.idTokenPayload.name);
       setAccessToken(tokens.accessToken);  
       localStorage.setItem('accessToken', tokens.accessToken);
-      alert(tokens.accessToken);
       console.log("Access token:", tokens.accessToken);     
     } catch (e) {
       setErrorState(true);
       setErrorMessage('Login failed: ' + e.message);
     }
   };
+
   if (!isAuthenticated) {
     return (
-      <div className="App">
-        <header className="App-header">
-          <h1>Welcome to Infocare</h1>
-          <button 
-            style={{fontSize: '24px', backgroundColor: 'skyblue', border: 'none', cursor: 'pointer'}} 
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <AppBar position="static" color="primary">
+          <Toolbar>
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+              Infocare
+            </Typography>
+          </Toolbar>
+        </AppBar>
+        <Container maxWidth="sm" style={{ textAlign: 'center', marginTop: '10%' }}>
+          <Typography variant="h4" gutterBottom>
+            Welcome to Infocare
+          </Typography>
+          <Typography variant="body1" gutterBottom>
+            Please login to continue
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
             onClick={loginAction}
             disabled={!isAppIDInitialized}
+            style={{ marginTop: '20px' }}
           >
             {isAppIDInitialized ? 'Login' : 'Initializing...'}
-          </button>
-          {errorState && <div style={{color: 'red'}}>{errorMessage}</div>}
-        </header>
-      </div>
+          </Button>
+          {errorState && <Typography color="error" style={{ marginTop: '20px' }}>{errorMessage}</Typography>}
+        </Container>
+      </ThemeProvider>
     );
   }
 
@@ -108,12 +124,9 @@ function App() {
         <div className="app">
           <Sidebar isSidebar={isSidebar} />
           <main className="content">
-            <Topbar setIsSidebar={setIsSidebar} />
-            <div style={{padding: '20px'}}>
-              <h2>Welcome, {userName}!</h2>
-            </div>
+            <Topbar setIsSidebar={setIsSidebar} userName={userName} />
             <Routes>
-              <Route path="/" element={<Dashboard accessToken={accessToken} />} /> {/* Pass token to Dashboard */}
+              <Route path="/" element={<Dashboard accessToken={accessToken} />} />
               <Route path="/management" element={<Management />} />
               <Route path="/management/details/:databaseName" element={<ManagementDetails />} />
               <Route path="/management/details/:databaseName/responsiveness" element={<Responsiveness />} />
@@ -131,11 +144,11 @@ function App() {
               <Route path="/management/details/:databaseName/recovery/backups" element={<RecoveryBackups />} />
               <Route path="/management/details/:databaseName/recovery/logging" element={<RecoveryLogging />} />
               <Route path="/technical" element={<Technical />} />
-              <Route path="/technical/details/:databaseName" element={<TechnicalDetails/>} />
+              <Route path="/technical/details/:databaseName" element={<TechnicalDetails />} />
               <Route path="/technical/details/:databaseName/availability" element={<Availability />} />
               <Route path="/technical/details/:databaseName/efficiency" element={<Efficiency />} />
               <Route path="/technical/details/:databaseName/organization" element={<Organization />} />
-              <Route path="/technical/details/:databaseName/technical_recover" element={<Recover/>} />
+              <Route path="/technical/details/:databaseName/technical_recover" element={<Recover />} />
               <Route path="/users" element={<Users />} />
               <Route path="/form" element={<Form />} />
               <Route path="/faq" element={<FAQ />} />
