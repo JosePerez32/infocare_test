@@ -3,21 +3,33 @@ import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import GaugeComponent from "react-gauge-component";
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 
 const ManagementDetails = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const { databaseName } = useParams();
+  const { organization } = useLocation().state || {};
   const navigate = useNavigate();
   const [detailsData, setDetailsData] = useState(null);
+  const { source } = useParams(); // Retrieve source from the URL parameters
   const [gaugeOrder, setGaugeOrder] = useState(["responsiveness", "security", "recovery"]);
   const [alertVisible, setAlertVisible] = useState(false);
 
   useEffect(() => {
     const fetchDetailsData = async () => {
       try {
-        const response = await fetch(process.env.REACT_APP_API_URL +  `/api/management/details/${databaseName}`);
+        const token = localStorage.getItem('token'); // Retrieve token from localStorage
+
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/dashboards/${organization}/management/${source}`, 
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`, // Add token to Authorization header
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        
         const data = await response.json();
         setDetailsData(data);
       } catch (error) {
@@ -25,16 +37,16 @@ const ManagementDetails = () => {
       }
     };
 
-    const savedOrder = localStorage.getItem(`gaugeOrder_${databaseName}`);
+    const savedOrder = localStorage.getItem(`gaugeOrder_${source}`);
     if (savedOrder) {
       setGaugeOrder(JSON.parse(savedOrder));
     }
 
     fetchDetailsData();
-  }, [databaseName]);
+  }, [organization, source]);
 
   const handleBoxClick = (route) => {
-    navigate(`/management/details/${databaseName}/${route}`);
+    navigate(`/management/details/${source}/${route}`);
   };
 
   const handleDragStart = (index) => {
@@ -51,7 +63,7 @@ const ManagementDetails = () => {
       const [movedItem] = newOrder.splice(fromIndex, 1);
       newOrder.splice(index, 0, movedItem);
       setGaugeOrder(newOrder);
-      localStorage.setItem(`gaugeOrder_${databaseName}`, JSON.stringify(newOrder));
+      localStorage.setItem(`gaugeOrder_${source}`, JSON.stringify(newOrder));
       setAlertVisible(true);
       setTimeout(() => setAlertVisible(false), 3000); // Hide alert after 3 seconds
     };
@@ -95,8 +107,8 @@ const ManagementDetails = () => {
 
   return (
     <Box m="20px">
-      <Header title={`Details for ${databaseName}`} subtitle="Details" />
-      {alertVisible && <Alert variant="outlined"  severity="success">Gauge chart order changed and saved</Alert>}
+      <Header title={`Details for ${source}`} subtitle="Details" />
+      {alertVisible && <Alert variant="outlined" severity="success">Gauge chart order changed and saved</Alert>}
       <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap="20px">
         {gaugeOrder.map((gauge, index) => (
           <GaugeBox

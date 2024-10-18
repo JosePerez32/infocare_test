@@ -52,10 +52,12 @@ const Management = () => {
 
     fetchSourceData();
   }, [organization]);
-
+  
   const handleSourceClick = (source) => {
-    navigate(`details/${source.name}`);
+    const session = localStorage.getItem('session'); // Assuming 'session' is stored in localStorage
+    navigate(`details/${source.name}`, { state: { organization, session } });
   };
+  
 
   // Drag and drop handlers
   const handleDragStart = (index) => {

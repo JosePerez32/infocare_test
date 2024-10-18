@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import AppID from 'ibmcloud-appid-js';
-import { CssBaseline, ThemeProvider, Button, Typography, Box, AppBar, Toolbar, Container } from "@mui/material";
+import { CssBaseline, ThemeProvider, Button, Typography, AppBar, Toolbar, Container } from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
 import Topbar from "./scenes/global/Topbar";
 import Sidebar from "./scenes/global/Sidebar";
@@ -128,7 +128,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Dashboard accessToken={accessToken} />} />
               <Route path="/management" element={<Management />} />
-              <Route path="/management/details/:databaseName" element={<ManagementDetails />} />
+              <Route path="/management/details/:source" element={<ManagementDetails />} />
               <Route path="/management/details/:databaseName/responsiveness" element={<Responsiveness />} />
               <Route path="/management/details/:databaseName/responsiveness/cpu" element={<ResponsivenessCpu />} />
               <Route path="/management/details/:databaseName/responsiveness/memory" element={<ResponsivenessMemory />} />
