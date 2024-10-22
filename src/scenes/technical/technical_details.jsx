@@ -3,19 +3,31 @@ import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import GaugeComponent from "react-gauge-component";
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 
 const TechnicalDetails = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const { databaseName } = useParams();
+  const { organization } = useLocation().state || {};
   const navigate = useNavigate();
+  const { source } = useParams(); // Retrieve source from the URL parameters
   const [detailsData, setDetailsData] = useState(null);
 
   useEffect(() => {
     const fetchDetailsData = async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:3001/api/technical/details/${databaseName}`);
+        const token = localStorage.getItem('token'); // Retrieve token from localStorage
+
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/dashboards/${organization}/management/sources/${source}`, 
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`, // Add token to Authorization header
+              'Content-Type': 'application/json',
+            },
+          }
+        );
         const data = await response.json();
         setDetailsData(data);
       } catch (error) {
@@ -24,7 +36,7 @@ const TechnicalDetails = () => {
     };
 
     fetchDetailsData();
-  }, [databaseName]);
+  }, [databaseName,organization,source]);
 
   if (!detailsData) return <Typography>Loading...</Typography>;
 

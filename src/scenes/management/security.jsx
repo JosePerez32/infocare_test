@@ -3,14 +3,15 @@ import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import GaugeComponent from "react-gauge-component";
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 
 const Security = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const { databaseName } = useParams(); // Get the database name from URL params
   const navigate = useNavigate();
-
+  const { organization } = useLocation().state || {};
+  const { source } = useParams(); // Retrieve source from the URL parameters
   const [securityData, setSecurityData] = useState({
     encryption: 0,
     users: 0,
@@ -22,12 +23,22 @@ const Security = () => {
   useEffect(() => {
     const fetchSecurityData = async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:3001/api/security/${databaseName}`);
+        const token = localStorage.getItem('token'); // Retrieve token from localStorage
+
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/dashboards/${organization}/management/sources/${source}/security`, 
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`, // Add token to Authorization header
+              'Content-Type': 'application/json',
+            },
+          }
+        );  
         const data = await response.json();
         setSecurityData({
-          encryption: data.security.encryption,
-          users: data.security.users,
-          masking: data.security.masking,
+          encryption: data.encryption,
+          users: data.users,
+          masking: data.masking,
          
         });
       } catch (error) {
@@ -43,7 +54,7 @@ const Security = () => {
 
     // Clean up interval on component unmount
     return () => clearInterval(interval);
-  }, [databaseName]); // Re-run if databaseName changes
+  }, [databaseName, organization, source]); // Re-run if databaseName changes
 
   const SecurityBox = ({ title, value, route }) => (
     <Box

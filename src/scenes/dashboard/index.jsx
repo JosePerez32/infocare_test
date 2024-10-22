@@ -6,6 +6,7 @@ import HandshakeIcon from '@mui/icons-material/Handshake';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import MoreTimeIcon from '@mui/icons-material/MoreTime';
 
+
 const Dashboard = ({ accessToken }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -18,7 +19,7 @@ const Dashboard = ({ accessToken }) => {
           const response = await fetch(process.env.REACT_APP_API_URL + '/userinfo', {
             method: 'GET',
             headers: {
-              'Authorization': `Bearer ${accessToken}`, // Use the access token
+              'Authorization': `Bearer ${accessToken}`,
             },
           });
           const data = await response.json();
@@ -28,6 +29,11 @@ const Dashboard = ({ accessToken }) => {
           if (data.organisation) {
             localStorage.setItem('organization', data.organisation);
           }
+
+          // Set user role
+          if (data.role) {
+            localStorage.setItem('userRole', data.role);
+          }
         } catch (error) {
           console.error("Error fetching user info:", error);
         }
@@ -36,6 +42,7 @@ const Dashboard = ({ accessToken }) => {
 
     fetchUserInfo();
   }, [accessToken]);
+
 
   return (
     <Box m="20px">
@@ -49,12 +56,12 @@ const Dashboard = ({ accessToken }) => {
         display="flex"
         alignItems="center"
         justifyContent="center"
-        height="300px" // Increased height for better visibility
+        height="300px"
         sx={{
           backgroundColor: colors.primary[400],
           borderRadius: "10px",
           boxShadow: 3,
-          marginY: "20px", // Added margin for spacing
+          marginY: "20px",
         }}
       >
         <img 

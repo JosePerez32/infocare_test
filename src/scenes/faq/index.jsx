@@ -17,7 +17,7 @@ const FAQ = () => {
       <Accordion defaultExpanded>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography color={colors.greenAccent[500]} variant="h5">
-            An Important Question
+          How can you change the sequence of the gauge curves ?
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
@@ -30,7 +30,7 @@ const FAQ = () => {
       <Accordion defaultExpanded>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography color={colors.greenAccent[500]} variant="h5">
-            Another Important Question
+          Why is there a difference between the same database on management and technical level?
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
@@ -43,7 +43,7 @@ const FAQ = () => {
       <Accordion defaultExpanded>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography color={colors.greenAccent[500]} variant="h5">
-            Your Favorite Question
+          Where can I find locking information?
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
@@ -56,20 +56,7 @@ const FAQ = () => {
       <Accordion defaultExpanded>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography color={colors.greenAccent[500]} variant="h5">
-            Some Random Question
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Typography>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-            malesuada lacus ex, sit amet blandit leo lobortis eget.
-          </Typography>
-        </AccordionDetails>
-      </Accordion>
-      <Accordion defaultExpanded>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography color={colors.greenAccent[500]} variant="h5">
-            The Final Question
+          How can we ask/confirm the start of a trace?
           </Typography>
         </AccordionSummary>
         <AccordionDetails>

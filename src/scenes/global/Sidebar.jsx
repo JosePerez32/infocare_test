@@ -85,7 +85,7 @@ const Sidebar = () => {
                   </Typography>
                 </Box>
                 <Box position="relative" top="-6px" ml="-4px">
-    <Chip label="v1.2" size="small" style={{ backgroundColor: '#71D8BD', color: colors.primary[400] }} />
+    <Chip label="v1.3" size="small" style={{ backgroundColor: '#71D8BD', color: colors.primary[400] }} />
   </Box>
                 <IconButton onClick={() => setIsCollapsed(!isCollapsed)} >
                   <MenuOutlinedIcon />

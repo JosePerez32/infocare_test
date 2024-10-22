@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import AppID from 'ibmcloud-appid-js';
 import { CssBaseline, ThemeProvider, Button, Typography, AppBar, Toolbar, Container } from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
@@ -36,6 +36,7 @@ import Calendar from "./scenes/calendar/calendar";
 function App() {
   const [theme, colorMode] = useMode();
   const [isSidebar, setIsSidebar] = useState(true);
+  const navigate = useNavigate();
 
   // AppID Authentication
   const appID = useMemo(() => new AppID(), []);
@@ -62,6 +63,15 @@ function App() {
     initAppID();
   }, [appID]);
 
+  useEffect(() => {
+    const storedToken = localStorage.getItem('accessToken');
+    if (storedToken) {
+      setIsAuthenticated(true);
+      setAccessToken(storedToken);
+      // You might want to verify the token here or fetch user info
+    }
+  }, []);
+
   const loginAction = async () => {
     if (!isAppIDInitialized) {
       setErrorState(true);
@@ -81,6 +91,14 @@ function App() {
       setErrorState(true);
       setErrorMessage('Login failed: ' + e.message);
     }
+  };
+
+  const logoutAction = () => {
+    localStorage.removeItem('accessToken');
+    setIsAuthenticated(false);
+    setUserName('');
+    setAccessToken(null);
+    navigate('/');
   };
 
   if (!isAuthenticated) {
@@ -124,7 +142,7 @@ function App() {
         <div className="app">
           <Sidebar isSidebar={isSidebar} />
           <main className="content">
-            <Topbar setIsSidebar={setIsSidebar} userName={userName} />
+            <Topbar setIsSidebar={setIsSidebar} userName={userName} onLogout={logoutAction} />
             <Routes>
               <Route path="/" element={<Dashboard accessToken={accessToken} />} />
               <Route path="/management" element={<Management />} />

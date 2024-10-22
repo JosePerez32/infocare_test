@@ -4,7 +4,7 @@ import Header from "../../components/Header";
 import GaugeComponent from "react-gauge-component";
 import { useTheme } from "@mui/material";
 import { tokens } from "../../theme";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 
 const Availability = () => {
   const { databaseName } = useParams(); // Get database name from the URL
@@ -13,16 +13,28 @@ const Availability = () => {
   const [responseData, setResponseData] = useState(0);
   const [memoryData, setMemoryData] = useState([]);
   const [spaceData, setSpaceData] = useState([]);
+  const { source } = useParams(); // Retrieve source from the URL parameters
+  const { organization } = useLocation().state || {};
  
 
   useEffect(() => {
     const fetchAvailibilityData = async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:3001/api/availability/${databaseName}`);
+        const token = localStorage.getItem('token'); // Retrieve token from localStorage
+
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/dashboards/${organization}/technical/sources/${source}/availability`, 
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`, // Add token to Authorization header
+              'Content-Type': 'application/json',
+            },
+          }
+        );        
         const data = await response.json();
-        setResponseData(data.recovery.response);
-        setMemoryData(data.recovery.memory);
-        setSpaceData(data.recovery.space);
+        setResponseData(data.response);
+        setMemoryData(data.memory);
+        setSpaceData(data.space);
     
 
         console.log(data); // Check the fetched data
@@ -32,7 +44,7 @@ const Availability = () => {
     };
 
     fetchAvailibilityData();
-  }, [databaseName]);
+  }, [databaseName, organization,source]);
 
   return (
 

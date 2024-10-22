@@ -21,7 +21,7 @@ const ManagementDetails = () => {
         const token = localStorage.getItem('token'); // Retrieve token from localStorage
 
         const response = await fetch(
-          `${process.env.REACT_APP_API_URL}/dashboards/${organization}/management/${source}`, 
+          `${process.env.REACT_APP_API_URL}/dashboards/${organization}/management/sources/${source}`, 
           {
             headers: {
               'Authorization': `Bearer ${token}`, // Add token to Authorization header

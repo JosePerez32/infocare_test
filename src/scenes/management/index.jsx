@@ -20,7 +20,7 @@ const Management = () => {
     const fetchSourceData = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/dashboards/${organization}/sources`, {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/dashboards/${organization}//management/sources`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,

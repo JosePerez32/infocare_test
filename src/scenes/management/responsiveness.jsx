@@ -4,13 +4,15 @@ import Header from "../../components/Header";
 import GaugeComponent from "react-gauge-component";
 import { useTheme } from "@mui/material";
 import { tokens } from "../../theme";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 
 const Responsiveness = () => {
   const { databaseName } = useParams();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
+  const { organization } = useLocation().state || {};
+  const { source } = useParams(); // Retrieve source from the URL parameters
   const [responsiveData, setResponsiveData] = useState({
     cpu: 0,
     memory: 0,
@@ -22,14 +24,24 @@ const Responsiveness = () => {
   useEffect(() => {
     const fetchResponsivenessData = async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:3001/api/responsiveness/${databaseName}`);
+        const token = localStorage.getItem('token'); // Retrieve token from localStorage
+
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/dashboards/${organization}/management/sources/${source}/responsivness`, 
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`, // Add token to Authorization header
+              'Content-Type': 'application/json',
+            },
+          }
+        );        
         const data = await response.json();
         setResponsiveData({
-          cpu: data.responsiveness.cpu,
-          memory: data.responsiveness.memory,
-          space: data.responsiveness.space,
-          speed: data.responsiveness.speed,
-          readiness: data.responsiveness.readinessData
+          cpu: data.cpu,
+          memory: data.memory,
+          space: data.space,
+          speed: data.speed,
+          readiness: data.readinessData
         });
         console.log(data);
       } catch (error) {
@@ -41,7 +53,7 @@ const Responsiveness = () => {
     const interval = setInterval(fetchResponsivenessData, 5000);
 
     return () => clearInterval(interval);
-  }, [databaseName]);
+  }, [databaseName,organization, source]);
 
   const ResponsivenessBox = ({ title, value, route }) => (
     <Box

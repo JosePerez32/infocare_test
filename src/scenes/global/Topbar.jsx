@@ -15,15 +15,20 @@ import { ColorModeContext } from "../../theme";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import PersonIcon from '@mui/icons-material/Person';
+import LogoutIcon from '@mui/icons-material/Logout';
 import { useLocation, Link as RouterLink } from 'react-router-dom';
 import { tokens } from "../../theme";
 import Link from '@mui/material/Link';
 
-const Topbar = ({ userName, setIsSidebar }) => {
+const Topbar = ({ userName, setIsSidebar, onLogout }) => {
   const theme = useTheme();
   const colorMode = useContext(ColorModeContext);
   const colors = tokens(theme.palette.mode);
   const location = useLocation();
+  const userRole = localStorage.getItem('userRole');
+
 
   const breadcrumbNameMap = {
     '/': 'Home',
@@ -80,6 +85,22 @@ const Topbar = ({ userName, setIsSidebar }) => {
 
   const combinedPathnames = getCombinedBreadcrumbs();
 
+  const handleLogout = () => {
+    onLogout();
+  };
+
+  const getRoleChip = () => {
+    const isAdmin = userRole.toLowerCase().includes('infocare-admin');
+    return (
+      <Chip
+        icon={isAdmin ? <AdminPanelSettingsIcon /> : <PersonIcon />}
+        label={isAdmin ? 'Admin' : 'Normal User'}
+        color={isAdmin ? 'secondary' : 'primary'}
+        sx={{ ml: 2 }}
+      />
+    );
+  };
+
   return (
     <AppBar 
       position="static" 
@@ -120,7 +141,6 @@ const Topbar = ({ userName, setIsSidebar }) => {
         </Box>
         
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          
           <Tooltip title="Toggle color mode">
             <IconButton onClick={colorMode.toggleColorMode} color="inherit">
               {theme.palette.mode === "dark" ? <LightModeOutlinedIcon /> : <DarkModeOutlinedIcon />}
@@ -133,6 +153,8 @@ const Topbar = ({ userName, setIsSidebar }) => {
             </IconButton>
           </Tooltip>
           
+          {userRole && getRoleChip()}
+
           {userName && (
             <Chip
               avatar={<Avatar sx={{ bgcolor: theme.palette.primary.main }}>{userName.charAt(0).toUpperCase()}</Avatar>}
@@ -147,6 +169,12 @@ const Topbar = ({ userName, setIsSidebar }) => {
               }}
             />
           )}
+          
+          <Tooltip title="Logout">
+            <IconButton color="inherit" onClick={handleLogout}>
+              <LogoutIcon />
+            </IconButton>
+          </Tooltip>
         </Box>
       </Toolbar>
     </AppBar>

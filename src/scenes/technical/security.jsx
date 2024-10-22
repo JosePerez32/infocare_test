@@ -4,7 +4,7 @@ import Header from "../../components/Header";
 import GaugeComponent from "react-gauge-component";
 import { useTheme } from "@mui/material";
 import { tokens } from "../../theme";
-import { useParams } from "react-router-dom";
+import { useParams , useLocation} from "react-router-dom";
 
 const Security = () => {
   const { databaseName } = useParams(); // Get database name from the URL
@@ -13,12 +13,26 @@ const Security = () => {
   const [publicData, setPublicData] = useState(0);
   const [usersData, setUsersData] = useState([]);
   const [sslData, setsslData] = useState([]);
+  const { source } = useParams(); // Retrieve source from the URL parameters
+  const { organization } = useLocation().state || {};
+
+ 
  
 
   useEffect(() => {
     const fetchSecurityData = async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:3001/api/technical/security/${databaseName}`);
+        const token = localStorage.getItem('token'); // Retrieve token from localStorage
+
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/dashboards/${organization}/technical/sources/${source}/security`, 
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`, // Add token to Authorization header
+              'Content-Type': 'application/json',
+            },
+          }
+        );     
         const data = await response.json();
         setPublicData(data.public);
         setUsersData(data.users);
@@ -27,12 +41,12 @@ const Security = () => {
 
         console.log(data); // Check the fetched data
       } catch (error) {
-        console.error("Error fetching recovery data:", error);
+        console.error("Error fetching security data:", error);
       }
     };
 
     fetchSecurityData();
-  }, [databaseName]);
+  }, [databaseName, organization,source]);
 
   return (
 

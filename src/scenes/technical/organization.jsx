@@ -4,7 +4,7 @@ import Header from "../../components/Header";
 import GaugeComponent from "react-gauge-component";
 import { useTheme } from "@mui/material";
 import { tokens } from "../../theme";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 
 const Organization = () => {
   const { databaseName } = useParams(); // Get database name from the URL
@@ -14,12 +14,24 @@ const Organization = () => {
   const [comparisonData, setComparisonData] = useState([]);
   const [statisticsData, setStatisticsData] = useState([]);
   const [scriptsData, setScriptsData] = useState([]);
+  const { source } = useParams(); // Retrieve source from the URL parameters
+  const { organization } = useLocation().state || {};
  
 
   useEffect(() => {
     const fetchOrganizationData = async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:3001/api/organization/${databaseName}`);
+        const token = localStorage.getItem('token'); // Retrieve token from localStorage
+
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/dashboards/${organization}/technical/sources/${source}/organization`, 
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`, // Add token to Authorization header
+              'Content-Type': 'application/json',
+            },
+          }
+        );     
         const data = await response.json();
         setDesignData(data.design);
         setComparisonData(data.comparison);
@@ -34,7 +46,7 @@ const Organization = () => {
     };
 
     fetchOrganizationData();
-  }, [databaseName]);
+  }, [databaseName,organization,source]);
 
   return (
 

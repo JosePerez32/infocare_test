@@ -4,13 +4,15 @@ import Header from "../../components/Header";
 import GaugeComponent from "react-gauge-component";
 import { useTheme } from "@mui/material";
 import { tokens } from "../../theme";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 
 const Recovery = () => {
   const { databaseName } = useParams(); // Get database name from the URL
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
+  const { organization } = useLocation().state || {};
+  const { source } = useParams(); // Retrieve source from the URL parameters
   const [recoveryData, setRecoveryData] = useState({
     drp: 0,
     logging: 0,
@@ -22,12 +24,22 @@ const Recovery = () => {
   useEffect(() => {
     const fetchRecoveryData = async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:3001/api/recovery/${databaseName}`);
+        const token = localStorage.getItem('token'); // Retrieve token from localStorage
+
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/dashboards/${organization}/management/sources/${source}/recovery`, 
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`, // Add token to Authorization header
+              'Content-Type': 'application/json',
+            },
+          }
+        );  
         const data = await response.json();
         setRecoveryData({
-          drp: data.recovery.drp,
-          logging: data.recovery.logging,
-          backups: data.recovery.backups,
+          drp: data.drp,
+          logging: data.logging,
+          backups: data.backups,
          
         });
     
@@ -42,7 +54,7 @@ const Recovery = () => {
     const interval = setInterval(fetchRecoveryData, 5000);
 
     return () => clearInterval(interval);
-  }, [databaseName]);
+  }, [databaseName, organization,source]);
 
   
   const RecoveryBox = ({ title, value, route }) => (

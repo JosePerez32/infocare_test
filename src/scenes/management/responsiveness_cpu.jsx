@@ -2,27 +2,39 @@ import React, { useState, useEffect } from "react";
 import { Box } from "@mui/material";
 import Header from "../../components/Header";
 import LineChart from "../../components/LineChart";
+import { useParams, useLocation } from "react-router-dom";
 
 const Line = ({ databaseName }) => {
   const [data, setData] = useState([]);
+  const { organization } = useLocation().state || {};
+  const { source } = useParams(); // Retrieve source from the URL parameters
+
 
   // Fetch data from the API
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const token = localStorage.getItem('token'); // Retrieve token from localStorage
+
         const response = await fetch(
-          `http://127.0.0.1:3001/api/management/responsiveness/cpu_usage/${databaseName}`
-        );
+          `${process.env.REACT_APP_API_URL}/dashboards/${organization}/management/sources/${source}/responsivness/cpu`, 
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`, // Add token to Authorization header
+              'Content-Type': 'application/json',
+            },
+          }
+        );        
         const result = await response.json();
 
         const transformedData = [
           {
             id: "CPU Responsiveness",
-            data: result.cpu_responsiveness.cpu_data,
+            data: result.cpu_data,
           },
           {
             id: "CPU System",
-            data: result.cpu_responsiveness.cpu_system_data,
+            data: result.cpu_system_data,
           },
           {
             id: "CPU Idle",
@@ -30,11 +42,11 @@ const Line = ({ databaseName }) => {
           },
           {
             id: "Swap In",
-            data: result.cpu_responsiveness.swap_in_data,
+            data: result.swap_in_data,
           },
           {
             id: "Swap Out",
-            data: result.cpu_responsiveness.swap_out_data,
+            data: result.swap_out_data,
           },
         ];
 
@@ -45,7 +57,7 @@ const Line = ({ databaseName }) => {
     };
 
     fetchData();
-  }, [databaseName]);
+  }, [databaseName,organization, source]);
 
   return (
     <Box m="20px">

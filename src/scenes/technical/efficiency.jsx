@@ -4,7 +4,7 @@ import Header from "../../components/Header";
 import GaugeComponent from "react-gauge-component";
 import { useTheme } from "@mui/material";
 import { tokens } from "../../theme";
-import { useParams } from "react-router-dom";
+import { useParams ,useLocation } from "react-router-dom";
 
 const Efficiency = () => {
   const { databaseName } = useParams(); // Get database name from the URL
@@ -14,12 +14,25 @@ const Efficiency = () => {
   const [connectionsData, setConnectionsData] = useState([]);
   const [loggingData, setLoggingData] = useState([]);
   const [lockingData, setLockingData] = useState([]);
+  const { source } = useParams(); // Retrieve source from the URL parameters
+  const { organization } = useLocation().state || {};
+
  
 
   useEffect(() => {
     const fetchEfficiencyData = async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:3001/api/efficiency/${databaseName}`);
+        const token = localStorage.getItem('token'); // Retrieve token from localStorage
+
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/dashboards/${organization}/technical/sources/${source}/efficiency`, 
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`, // Add token to Authorization header
+              'Content-Type': 'application/json',
+            },
+          }
+        );     
         const data = await response.json();
         setIndexData(data.index);
         setConnectionsData(data.connections);
@@ -34,7 +47,7 @@ const Efficiency = () => {
     };
 
     fetchEfficiencyData();
-  }, [databaseName]);
+  }, [databaseName,source,organization]);
 
   return (
 
