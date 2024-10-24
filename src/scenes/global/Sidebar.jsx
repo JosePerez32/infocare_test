@@ -68,7 +68,7 @@ const Sidebar = () => {
     );
 
     // Only render admin items if user has admin role
-    const adminItems = hasAccess(['writer']) && (
+    const adminItems = hasAccess(['writer', 'infocare-admin']) && (
       <>
         <Item
           title="Management View"
@@ -136,7 +136,7 @@ const Sidebar = () => {
     );
 
     // Only render client items if user has client role
-    const clientItems = hasAccess(['reader']) && (
+    const clientItems = hasAccess(['reader','infocare-admin']) && (
       <Item
         title="Management View"
         to="/management"
@@ -147,7 +147,7 @@ const Sidebar = () => {
     );
 
     // Only render in-house items if user has in-house role
-    const inHouseItems = hasAccess(['admin']) && (
+    const inHouseItems = hasAccess(['admin','infocare-admin']) && (
       <Item
           title="Clients "
           to="/clients"
