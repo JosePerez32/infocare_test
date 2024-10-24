@@ -9,8 +9,10 @@ import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
 import ContactsOutlinedIcon from "@mui/icons-material/ContactsOutlined";
 import Chip from '@mui/material/Chip';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
-import SupportAgentIcon from '@mui/icons-material/SupportAgent';
+import RecentActorsIcon from '@mui/icons-material/RecentActors';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
+import SchemaIcon from '@mui/icons-material/Schema';
+import BookIcon from '@mui/icons-material/Book';
 import GroupIcon from '@mui/icons-material/Group';
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
@@ -38,6 +40,141 @@ const Sidebar = () => {
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selected, setSelected] = useState("Dashboard");
+  const userRole = localStorage.getItem('userRole');
+
+  // Function to check if user has access to a route
+  const hasAccess = (allowedRoles) => {
+    return allowedRoles.includes(userRole);
+  };
+
+  const getMenuItems = () => {
+    const commonItems = (
+      <>
+        <Item
+          title="Home"
+          to="/"
+          icon={<HomeOutlinedIcon />}
+          selected={selected}
+          setSelected={setSelected}
+        />
+        <Typography
+          variant="h6"
+          color={colors.grey[300]}
+          sx={{ m: "15px 0 5px 20px" }}
+        >
+          Dashboard
+        </Typography>
+      </>
+    );
+
+    // Only render admin items if user has admin role
+    const adminItems = hasAccess(['infocare-admin']) && (
+      <>
+        <Item
+          title="Management View"
+          to="/management"
+          icon={<ManageAccountsIcon />}
+          selected={selected}
+          setSelected={setSelected}
+        />
+        <Item
+          title="Technical View"
+          to="/technical"
+          icon={<ContactsOutlinedIcon />}
+          selected={selected}
+          setSelected={setSelected}
+        />
+        <Divider style={{ margin: "15px 0", backgroundColor: colors.grey[500] }} />
+        <Typography
+          variant="h6"
+          color={colors.grey[300]}
+          sx={{ m: "15px 0 5px 20px" }}
+        >
+          Application
+        </Typography>
+        <SubMenu
+          title="Users"
+          icon={<PeopleOutlinedIcon />}
+        >
+          <Item
+            title="Create User"
+            to="/form"
+            icon={<GroupAddIcon />}
+            selected={selected}
+            setSelected={setSelected}
+          />
+          <Item
+            title="Users List"
+            to="/users"
+            icon={<GroupIcon />}
+            selected={selected}
+            setSelected={setSelected}
+          />
+        </SubMenu>
+        <Item
+          title="Client Lists"
+          to="/clients"
+          icon={<RecentActorsIcon />}
+          selected={selected}
+          setSelected={setSelected}
+        />
+         <Item
+          title="Logging"
+          to="/logging"
+          icon={<BookIcon />}
+          selected={selected}
+          setSelected={setSelected}
+        />
+         <Item
+          title="Maps"
+          to="/map"
+          icon={<SchemaIcon />}
+          selected={selected}
+          setSelected={setSelected}
+        />
+      </>
+    );
+
+    // Only render client items if user has client role
+    const clientItems = hasAccess(['infocare-client']) && (
+      <Item
+        title="Management View"
+        to="/management"
+        icon={<ManageAccountsIcon />}
+        selected={selected}
+        setSelected={setSelected}
+      />
+    );
+
+    // Only render in-house items if user has in-house role
+    const inHouseItems = hasAccess(['infocare-inhouse']) && (
+      <Item
+          title="Clients "
+          to="/clients"
+          icon={<RecentActorsIcon />}
+          selected={selected}
+          setSelected={setSelected}
+        />
+    );
+
+    return (
+      <>
+        {commonItems}
+        {adminItems}
+        {clientItems}
+        {inHouseItems}
+        <Item
+          title="FAQ Page"
+          to="/faq"
+          icon={<HelpOutlineOutlinedIcon />}
+          selected={selected}
+          setSelected={setSelected}
+        />
+      </>
+    );
+  };
+
+    
 
   return (
     <Box
@@ -78,97 +215,23 @@ const Sidebar = () => {
                 ml="15px"
               >
                 <Box display="flex" alignItems="center" gap={1}>
-                  {/* Add your logo/icon here */}
                   <img src="./assets/Watermark_Project_rechts_24pxPNG.png" alt="Infocare Logo" style={{ width: "24px" }} />
                   <Typography variant="h3" color={colors.grey[100]}>
                     Infocare
                   </Typography>
                 </Box>
                 <Box position="relative" top="-6px" ml="-4px">
-    <Chip label="v1.3" size="small" style={{ backgroundColor: '#71D8BD', color: colors.primary[400] }} />
-  </Box>
+                  <Chip label="v1.3" size="small" style={{ backgroundColor: '#71D8BD', color: colors.primary[400] }} />
+                </Box>
                 <IconButton onClick={() => setIsCollapsed(!isCollapsed)} >
                   <MenuOutlinedIcon />
                 </IconButton>
               </Box>
-
             )}
           </MenuItem>
 
           <Box paddingLeft={isCollapsed ? undefined : "10%"}>
-            <Item
-              title="Home"
-              to="/"
-              icon={<HomeOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-
-            <Typography
-              variant="h6"
-              color={colors.grey[300]}
-              sx={{ m: "15px 0 5px 20px" }}
-            >
-              Dashboard
-            </Typography>
-            <Item
-              title="Management View"
-              to="/management"
-              icon={<ManageAccountsIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-            <Item
-              title="Technical View"
-              to="/technical"
-              icon={<ContactsOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-
-            <Divider style={{ margin: "15px 0", backgroundColor: colors.grey[500] }} />
-
-            <Typography
-              variant="h6"
-              color={colors.grey[300]}
-              sx={{ m: "15px 0 5px 20px" }}
-            >
-              Application
-            </Typography>
-
-            <SubMenu
-              title="Users"
-              icon={<PeopleOutlinedIcon />}
-            >
-              <Item
-                title="Create User"
-                to="/form"
-                icon={<GroupAddIcon />}
-                selected={selected}
-                setSelected={setSelected}
-              />
-              <Item
-                title="Users List"
-                to="/users"
-                icon={<GroupIcon />}
-                selected={selected}
-                setSelected={setSelected}
-              />
-            </SubMenu>
-            <Item
-              title="Ticketing (In Progress)"
-              to="/chat"
-              icon={<SupportAgentIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-            <Item
-              title="FAQ Page"
-              to="/faq"
-              icon={<HelpOutlineOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
+            {getMenuItems()}
           </Box>
         </Menu>
       </ProSidebar>

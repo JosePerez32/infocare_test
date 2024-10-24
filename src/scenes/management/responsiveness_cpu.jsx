@@ -17,7 +17,7 @@ const Line = ({ databaseName }) => {
         const token = localStorage.getItem('token'); // Retrieve token from localStorage
 
         const response = await fetch(
-          `${process.env.REACT_APP_API_URL}/dashboards/${organization}/management/sources/${source}/responsivness/cpu`, 
+          `${process.env.REACT_APP_API_URL}/dashboards/${organization}/metrics/${source}/cpu_user`, 
           {
             headers: {
               'Authorization': `Bearer ${token}`, // Add token to Authorization header
@@ -30,7 +30,7 @@ const Line = ({ databaseName }) => {
         const transformedData = [
           {
             id: "CPU Responsiveness",
-            data: result.cpu_data,
+            data: result,
           },
           {
             id: "CPU System",

@@ -22,13 +22,13 @@ import { useLocation, Link as RouterLink } from 'react-router-dom';
 import { tokens } from "../../theme";
 import Link from '@mui/material/Link';
 
-const Topbar = ({ userName, setIsSidebar, onLogout }) => {
+const Topbar = ({ userName, userInfo, setIsSidebar, onLogout }) => {
   const theme = useTheme();
   const colorMode = useContext(ColorModeContext);
   const colors = tokens(theme.palette.mode);
   const location = useLocation();
-  const userRole = localStorage.getItem('userRole');
-
+  const userRole = userInfo?.role 
+  const organization = userInfo?.organisation 
 
   const breadcrumbNameMap = {
     '/': 'Home',
@@ -90,7 +90,7 @@ const Topbar = ({ userName, setIsSidebar, onLogout }) => {
   };
 
   const getRoleChip = () => {
-    const isAdmin = userRole.toLowerCase().includes('infocare-admin');
+    const isAdmin = userRole?.toLowerCase().includes('infocare-admin');
     return (
       <Chip
         icon={isAdmin ? <AdminPanelSettingsIcon /> : <PersonIcon />}
@@ -99,6 +99,19 @@ const Topbar = ({ userName, setIsSidebar, onLogout }) => {
         sx={{ ml: 2 }}
       />
     );
+  };
+
+  const getOrganizationChip = () => {
+    if (organization) {
+      return (
+        <Chip
+          label={organization}
+          color="info"
+          sx={{ ml: 2 }}
+        />
+      );
+    }
+    return null;
   };
 
   return (
@@ -153,6 +166,7 @@ const Topbar = ({ userName, setIsSidebar, onLogout }) => {
             </IconButton>
           </Tooltip>
           
+          {userInfo && getOrganizationChip()}
           {userRole && getRoleChip()}
 
           {userName && (
@@ -171,7 +185,7 @@ const Topbar = ({ userName, setIsSidebar, onLogout }) => {
           )}
           
           <Tooltip title="Logout">
-            <IconButton color="inherit" onClick={handleLogout}>
+            <IconButton color="inherit" onClick={handleLogout} sx={{ ml: 2 }}>
               <LogoutIcon />
             </IconButton>
           </Tooltip>

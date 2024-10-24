@@ -6,7 +6,6 @@ import PieChart from "../../components/PieChart";
 const ResponsivenessSpace = ({ databaseName }) => {
   const [data, setData] = useState([]);
   
-
   useEffect(() => {
     const fetchData = async () => {
       try {

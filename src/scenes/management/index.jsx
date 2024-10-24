@@ -1,4 +1,4 @@
-import { Box, useTheme, Typography, Alert } from "@mui/material";
+import { Box, useTheme, Typography, Alert, Select, MenuItem, TextField, FormControl, InputLabel } from "@mui/material";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import GaugeComponent from 'react-gauge-component';
@@ -14,13 +14,29 @@ const Management = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const organization = localStorage.getItem('organization');
+  
+  // New state for gauge customization
+  const [colorScheme, setColorScheme] = useState('red-green');
+  const [thresholds, setThresholds] = useState({
+    low: 20,
+    medium: 40,
+    high: 60,
+    veryHigh: 80
+  });
+
+  // Color scheme options
+  const colorSchemes = {
+    'red-green': ['#EA4228', '#5BE12C'],
+    'yellow-blue': ['#FFD700', '#0000FF'],
+    'orange-purple': ['#FFA500', '#800080']
+  };
 
   // Fetch data and retrieve order from localStorage
   useEffect(() => {
     const fetchSourceData = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/dashboards/${organization}//management/sources`, {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/dashboards/${organization}/management/sources`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -30,7 +46,6 @@ const Management = () => {
 
         const data = await response.json();
 
-        // Populate gauge data with the fetched sources
         const filledGaugeData = data.sources.map(source => ({
           name: source.name,
           health: source.health,
@@ -38,12 +53,11 @@ const Management = () => {
 
         setGaugeData(filledGaugeData);
 
-        // Load saved order from localStorage, if exists
         const savedOrder = localStorage.getItem('order_management');
         if (savedOrder) {
           setGaugeOrder(JSON.parse(savedOrder));
         } else {
-          setGaugeOrder(filledGaugeData.map(source => source.name)); // Default order
+          setGaugeOrder(filledGaugeData.map(source => source.name));
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -54,12 +68,10 @@ const Management = () => {
   }, [organization]);
   
   const handleSourceClick = (source) => {
-    const session = localStorage.getItem('session'); // Assuming 'session' is stored in localStorage
+    const session = localStorage.getItem('session');
     navigate(`details/${source.name}`, { state: { organization, session } });
   };
-  
 
-  // Drag and drop handlers
   const handleDragStart = (index) => {
     return (event) => {
       event.dataTransfer.setData("text/plain", index);
@@ -75,17 +87,25 @@ const Management = () => {
       newOrder.splice(index, 0, movedItem);
       setGaugeOrder(newOrder);
 
-      // Save the new order in localStorage
       localStorage.setItem('order_management', JSON.stringify(newOrder));
-
-      // Show alert on order change
       setAlertVisible(true);
       setTimeout(() => setAlertVisible(false), 3000);
     };
   };
 
   const handleDragOver = (event) => {
-    event.preventDefault(); // Allow the drop
+    event.preventDefault();
+  };
+
+  // Handle threshold changes
+  const handleThresholdChange = (type) => (event) => {
+    const value = parseInt(event.target.value);
+    if (!isNaN(value) && value >= 0 && value <= 100) {
+      setThresholds(prev => ({
+        ...prev,
+        [type]: value
+      }));
+    }
   };
 
   const isNestedRoute = location.pathname.includes('/management/details');
@@ -93,17 +113,63 @@ const Management = () => {
   return (
     <Box m="20px">
       {!isNestedRoute && (
-        <Header
-          title="MANAGEMENT"
-          subtitle={`Management view of ${organization}`}
-        />
+        <>
+          <Header
+            title="MANAGEMENT"
+            subtitle={`Management view of ${organization}`}
+          />
+          <Box mb={3} display="flex" gap={2} alignItems="center">
+            <FormControl variant="outlined" sx={{ minWidth: 200 }}>
+              <InputLabel>Color Scheme</InputLabel>
+              <Select
+                value={colorScheme}
+                onChange={(e) => setColorScheme(e.target.value)}
+                label="Color Scheme"
+              >
+                <MenuItem value="red-green">Red to Green</MenuItem>
+                <MenuItem value="yellow-blue">Yellow to Blue</MenuItem>
+                <MenuItem value="orange-purple">Orange to Purple</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              label="Low Threshold"
+              type="number"
+              value={thresholds.low}
+              onChange={handleThresholdChange('low')}
+              InputProps={{ inputProps: { min: 0, max: 100 } }}
+            />
+            <TextField
+              label="Medium Threshold"
+              type="number"
+              value={thresholds.medium}
+              onChange={handleThresholdChange('medium')}
+              InputProps={{ inputProps: { min: 0, max: 100 } }}
+            />
+            <TextField
+              label="High Threshold"
+              type="number"
+              value={thresholds.high}
+              onChange={handleThresholdChange('high')}
+              InputProps={{ inputProps: { min: 0, max: 100 } }}
+            />
+            <TextField
+              label="Very High Threshold"
+              type="number"
+              value={thresholds.veryHigh}
+              onChange={handleThresholdChange('veryHigh')}
+              InputProps={{ inputProps: { min: 0, max: 100 } }}
+            />
+          </Box>
+        </>
       )}
+      
       {alertVisible && <Alert variant="outlined" severity="success">Gauge chart order changed and saved</Alert>}
+      
       {!isNestedRoute && (
         <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap="20px">
           {gaugeOrder.map((gaugeName, index) => {
-            const source = gaugeData.find(g => g.name === gaugeName); // Find source by name
-            if (!source) return null; // If the source is not found, skip rendering
+            const source = gaugeData.find(g => g.name === gaugeName);
+            if (!source) return null;
 
             return (
               <Box
@@ -134,17 +200,23 @@ const Management = () => {
                     tickLabels: {
                       type: "inner",
                       ticks: [
-                        { value: 20 },
-                        { value: 40 },
-                        { value: 60 },
-                        { value: 80 },
+                        { value: thresholds.low },
+                        { value: thresholds.medium },
+                        { value: thresholds.high },
+                        { value: thresholds.veryHigh },
                         { value: 100 }
                       ]
                     }
                   }}
                   arc={{
-                    colorArray: ['#EA4228', '#5BE12C'],
-                    subArcs: [{ limit: 10 }, { limit: 30 }, {}, {}, {}],
+                    colorArray: colorSchemes[colorScheme],
+                    subArcs: [
+                      { limit: thresholds.low },
+                      { limit: thresholds.medium },
+                      { limit: thresholds.high },
+                      { limit: thresholds.veryHigh },
+                      { limit: 100 }
+                    ],
                     padding: 0.02,
                     width: 0.3
                   }}
