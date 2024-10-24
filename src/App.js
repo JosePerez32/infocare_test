@@ -5,21 +5,17 @@ import {
   CssBaseline,
   ThemeProvider,
   createTheme,
-  Button,
   Typography,
   AppBar,
   Toolbar,
   Container,
   Box,
   Grid,
-  Paper,
-  useMediaQuery,
   LinearProgress,
   Fade,
-  alpha
 } from "@mui/material";
-import { Database, Server, Shield, LogIn, Activity, Cloud, ChevronRight } from "lucide-react";
-import { styled, keyframes } from '@mui/material/styles';
+import { Database, Shield, Activity, Cloud } from "lucide-react";
+import { styled } from '@mui/material/styles';
 import logoImage from './images/Watermark_Project_rechts_24pxPNG.png';
 
 // Import all existing components
@@ -58,34 +54,6 @@ import ResponsivenessSpeed from './scenes/management/responsiveness_speed';
 import ResponsivenessReadyness from './scenes/management/responsiveness_readyness';
 import Calendar from "./scenes/calendar/calendar";
 import Clients from "./scenes/infocare-inhouse/clients";
-
-// Custom theme with brand colors
-const brandTheme = createTheme({
-  palette: {
-    primary: {
-      main: '#148DCD', // Primary brand color
-      light: '#41A4D9',
-      dark: '#0E6B9B',
-    },
-    secondary: {
-      main: '#33A561', // Secondary brand color
-      light: '#4FBF7D',
-      dark: '#268047',
-    },
-    background: {
-      default: '#F5F6FA',
-    },
-  },
-  typography: {
-    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
-    h4: {
-      fontWeight: 700,
-    },
-    body1: {
-      fontSize: '1.1rem',
-    },
-  },
-});
 
 
 const loginTheme = createTheme({
@@ -262,7 +230,6 @@ function App() {
   const [theme, colorMode] = useMode();
   const [isSidebar, setIsSidebar] = useState(true);
   const navigate = useNavigate();
-  const isSmallScreen = useMediaQuery(brandTheme.breakpoints.down('sm'));
 
   // AppID Authentication
   const appID = useMemo(() => new AppID(), []);
@@ -333,9 +300,9 @@ function App() {
       setErrorState(false);
       setIsAuthenticated(true);
       setUserName(tokens.idTokenPayload.name);
-      setAccessToken(tokens.accessToken);
-      localStorage.setItem('accessToken', tokens.accessToken);
-      await fetchUserInfo(tokens.accessToken);
+      setAccessToken(tokens.idToken);
+      localStorage.setItem('accessToken', tokens.idToken);
+      await fetchUserInfo(tokens.idToken);
     } catch (e) {
       setErrorState(true);
       setErrorMessage('Login failed: ' + e.message);
@@ -389,7 +356,7 @@ function App() {
               <Box display="flex" alignItems="center">
                 <Logo src={logoImage} alt="Infocare Logo" />
                 <Typography variant="h6" component="div" sx={{ color: 'white' }}>
-                  Infocare Database Monitor
+                  Infocare 
                 </Typography>
               </Box>
             </Toolbar>
@@ -508,7 +475,7 @@ function App() {
               <Route
                 path="/management/*"
                 element={
-                  <ProtectedRoute allowedRoles={['infocare-admin', 'infocare-client']}>
+                  <ProtectedRoute allowedRoles={['reader', 'writer']}>
                     <Routes>
                       <Route path="/" element={<Management />} />
                       <Route path="details/:source" element={<ManagementDetails />} />
@@ -535,7 +502,7 @@ function App() {
               <Route
                 path="/technical/*"
                 element={
-                  <ProtectedRoute allowedRoles={['infocare-admin', 'infocare-inhouse']}>
+                  <ProtectedRoute allowedRoles={['reader', 'writer']}>
                     <Routes>
                       <Route path="/" element={<Technical />} />
                       <Route path="details/:databaseName" element={<TechnicalDetails />} />
@@ -552,7 +519,7 @@ function App() {
               <Route
                 path="/users"
                 element={
-                  <ProtectedRoute allowedRoles={['infocare-admin']}>
+                  <ProtectedRoute allowedRoles={['writer']}>
                     <Users />
                   </ProtectedRoute>
                 }
@@ -561,7 +528,7 @@ function App() {
               <Route
                 path="/form"
                 element={
-                  <ProtectedRoute allowedRoles={['infocare-admin']}>
+                  <ProtectedRoute allowedRoles={['writer']}>
                     <Form />
                   </ProtectedRoute>
                 }
@@ -570,7 +537,7 @@ function App() {
               <Route
                 path="/logging"
                 element={
-                  <ProtectedRoute allowedRoles={['infocare-admin']}>
+                  <ProtectedRoute allowedRoles={['writer']}>
                     <Logging />
                   </ProtectedRoute>
                 }
@@ -580,7 +547,7 @@ function App() {
               <Route
                 path="/map"
                 element={
-                  <ProtectedRoute allowedRoles={['infocare-admin']}>
+                  <ProtectedRoute allowedRoles={['writer']}>
                     <Maps />
                   </ProtectedRoute>
                 }
@@ -589,7 +556,7 @@ function App() {
               <Route
                 path="/clients"
                 element={
-                  <ProtectedRoute allowedRoles={['infocare-admin']}>
+                  <ProtectedRoute allowedRoles={['admin']}>
                     <Clients />
                   </ProtectedRoute>
                 }
