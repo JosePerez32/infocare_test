@@ -68,7 +68,7 @@ const Sidebar = () => {
     );
 
     // Only render admin items if user has admin role
-    const adminItems = hasAccess(['writer', 'infocare-admin']) && (
+    const adminItems = hasAccess(['writer', 'admin']) && (
       <>
         <Item
           title="Management View"
@@ -111,20 +111,6 @@ const Sidebar = () => {
             setSelected={setSelected}
           />
         </SubMenu>
-        <Item
-          title="Client Lists"
-          to="/clients"
-          icon={<RecentActorsIcon />}
-          selected={selected}
-          setSelected={setSelected}
-        />
-         <Item
-          title="Logging"
-          to="/logging"
-          icon={<BookIcon />}
-          selected={selected}
-          setSelected={setSelected}
-        />
          <Item
           title="Maps"
           to="/map"
@@ -136,7 +122,15 @@ const Sidebar = () => {
     );
 
     // Only render client items if user has client role
-    const clientItems = hasAccess(['reader','infocare-admin']) && (
+    const clientItems = hasAccess(['reader']) && (
+    <>
+      <Item
+          title="Technical View"
+          to="/technical"
+          icon={<ContactsOutlinedIcon />}
+          selected={selected}
+          setSelected={setSelected}
+        />
       <Item
         title="Management View"
         to="/management"
@@ -144,10 +138,19 @@ const Sidebar = () => {
         selected={selected}
         setSelected={setSelected}
       />
+    </>
     );
 
     // Only render in-house items if user has in-house role
-    const inHouseItems = hasAccess(['admin','infocare-admin']) && (
+    const inHouseItems = hasAccess(['admin']) && (
+    <>
+      <Item
+          title="Logging"
+          to="/logging"
+          icon={<BookIcon />}
+          selected={selected}
+          setSelected={setSelected}
+      />
       <Item
           title="Clients "
           to="/clients"
@@ -155,6 +158,7 @@ const Sidebar = () => {
           selected={selected}
           setSelected={setSelected}
         />
+    </>
     );
 
     return (

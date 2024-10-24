@@ -21,6 +21,9 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { useLocation, Link as RouterLink } from 'react-router-dom';
 import { tokens } from "../../theme";
 import Link from '@mui/material/Link';
+import CreateIcon from '@mui/icons-material/Create';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+  
 
 const Topbar = ({ userName, userInfo, setIsSidebar, onLogout }) => {
   const theme = useTheme();
@@ -88,18 +91,38 @@ const Topbar = ({ userName, userInfo, setIsSidebar, onLogout }) => {
   const handleLogout = () => {
     onLogout();
   };
-
+  
   const getRoleChip = () => {
-    const isAdmin = userRole?.toLowerCase().includes('infocare-admin');
+    const role = userRole?.toLowerCase();
+  
+    let icon = <PersonIcon />;
+    let label = 'Normal User';
+    let color = 'primary';
+  
+    if (role.includes('admin')) {
+      icon = <AdminPanelSettingsIcon />;
+      label = 'Admin';
+      color = 'secondary';
+    } else if (role.includes('writer')) {
+      icon = <CreateIcon />;
+      label = 'Writer';
+      color = 'primary';
+    } else if (role.includes('reader')) {
+      icon = <VisibilityIcon />;
+      label = 'Reader';
+      color = 'primary';
+    }
+  
     return (
       <Chip
-        icon={isAdmin ? <AdminPanelSettingsIcon /> : <PersonIcon />}
-        label={isAdmin ? 'Admin' : 'Normal User'}
-        color={isAdmin ? 'secondary' : 'primary'}
+        icon={icon}
+        label={label}
+        color={color}
         sx={{ ml: 2 }}
       />
     );
   };
+  
 
   const getOrganizationChip = () => {
     if (organization) {

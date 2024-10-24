@@ -23,7 +23,7 @@ const Security = () => {
   useEffect(() => {
     const fetchSecurityData = async () => {
       try {
-        const token = localStorage.getItem('token'); // Retrieve token from localStorage
+        const token = localStorage.getItem('accessToken'); // Retrieve token from localStorage
 
         const response = await fetch(
           `${process.env.REACT_APP_API_URL}/dashboards/${organization}/management/sources/${source}/security`, 

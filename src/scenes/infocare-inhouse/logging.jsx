@@ -11,29 +11,26 @@ import {
   TableRow,
   TablePagination,
   Chip,
-  IconButton,
   TextField,
   InputAdornment,
   Card,
   CardContent,
   Stack,
   Fade,
-  LinearProgress
+  LinearProgress,
+  useTheme,
+  alpha,
+  Avatar,
+  Tooltip
 } from '@mui/material';
 import {
   Search,
-  FilterList,
-  Info,
-  Warning,
-  Error,
-  CheckCircle
+  MouseOutlined,
+  Visibility
 } from '@mui/icons-material';
-import { tokens } from "../../theme";
-import { useTheme } from "@mui/material";
 
-const Logging = () => {
+const UserActivityLogging = () => {
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
@@ -41,24 +38,80 @@ const Logging = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [totalLogs, setTotalLogs] = useState(0);
 
-  // Mock data - Replace with your actual API call
+  // Move actionTypes outside of component or use useMemo
+  const actionTypes = {
+    CLICK: 'click',
+    VIEW: 'view'
+  };
+
+  // Custom colors for actions
+  const actionColors = {
+    [actionTypes.CLICK]: '#71D8BD',  // Custom green color for clicks
+    [actionTypes.VIEW]: '#2F8ECD'    // Custom blue color for views
+  };
+
+  // Get icon for action types
+  const getActionIcon = (action) => {
+    const icons = {
+      [actionTypes.CLICK]: <MouseOutlined />,
+      [actionTypes.VIEW]: <Visibility />
+    };
+    return icons[action];
+  };
+
+  // Mock data generation with simplified user activity
   useEffect(() => {
-    const fetchLogs = async () => {
-      try {
-        // Replace with your actual API endpoint
-        const response = await fetch('/api/logs');
-        const data = await response.json();
-        setLogs(data);
-        setTotalLogs(data.length);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching logs:', error);
-        setLoading(false);
-      }
+    const generateMockUserActivity = (CLICK_TYPE, VIEW_TYPE) => {
+      const users = [
+        { name: 'John Smith', email: 'john.smith@example.com', role: 'User' },
+        { name: 'Sarah Johnson', email: 'sarah.j@example.com', role: 'Admin' },
+        { name: 'Mike Wilson', email: 'mike.w@example.com', role: 'User' }
+      ];
+
+      const viewActions = [
+        'Viewed Dashboard',
+        'Viewed Profile',
+        'Viewed Settings',
+        'Viewed Reports',
+        'Viewed Analytics'
+      ];
+
+      const clickActions = [
+        'Clicked Submit Button',
+        'Clicked Menu Item',
+        'Clicked Download',
+        'Clicked Save',
+        'Clicked Navigation Link'
+      ];
+
+      return Array.from({ length: 50 }, (_, index) => {
+        const user = users[Math.floor(Math.random() * users.length)];
+        const isClick = Math.random() > 0.5;
+        const action = isClick ? CLICK_TYPE : VIEW_TYPE;
+        const actionDetail = isClick 
+          ? clickActions[Math.floor(Math.random() * clickActions.length)]
+          : viewActions[Math.floor(Math.random() * viewActions.length)];
+        
+        return {
+          id: `LOG${String(index + 1).padStart(4, '0')}`,
+          timestamp: new Date(Date.now() - index * 3600000).toISOString(),
+          user: {
+            ...user,
+            initials: user.name.split(' ').map(n => n[0]).join('')
+          },
+          action: action,
+          element: actionDetail,
+          path: `/dashboard/${action.toLowerCase()}/${index}`,
+          url: `https://example.com/dashboard/${action.toLowerCase()}/${index}`,
+        };
+      });
     };
 
-    fetchLogs();
-  }, []);
+    const mockData = generateMockUserActivity(actionTypes.CLICK, actionTypes.VIEW);
+    setLogs(mockData);
+    setTotalLogs(mockData.length);
+    setLoading(false);
+  }, [actionTypes.CLICK, actionTypes.VIEW]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -69,90 +122,77 @@ const Logging = () => {
     setPage(0);
   };
 
-  const getSeverityColor = (severity) => {
-    switch (severity.toLowerCase()) {
-      case 'error':
-        return colors.redAccent[500];
-      case 'warning':
-        return colors.orangeAccent[500];
-      case 'info':
-        return colors.blueAccent[500];
-      case 'success':
-        return colors.greenAccent[500];
-      default:
-        return colors.grey[500];
-    }
-  };
-
-  const getSeverityIcon = (severity) => {
-    switch (severity.toLowerCase()) {
-      case 'error':
-        return <Error />;
-      case 'warning':
-        return <Warning />;
-      case 'info':
-        return <Info />;
-      case 'success':
-        return <CheckCircle />;
-      default:
-        return <Info />;
-    }
+  const getActionColor = (action) => {
+    return actionColors[action];
   };
 
   const filteredLogs = logs.filter(log =>
     Object.values(log).some(value =>
-      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      typeof value === 'string' 
+        ? value.toLowerCase().includes(searchTerm.toLowerCase())
+        : typeof value === 'object' && value !== null
+          ? Object.values(value).some(v => 
+              typeof v === 'string' && v.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+          : false
     )
   );
 
   return (
-    <Box m="20px">
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography
-          variant="h2"
-          color={colors.grey[100]}
-          fontWeight="bold"
-          sx={{ mb: "5px" }}
-        >
-          System Logs
-        </Typography>
-      </Box>
+    <Box sx={{ p: 3, bgcolor: alpha(theme.palette.background.default, 0.98) }}>
+      {/* Header */}
+      <Typography
+        variant="h4"
+        sx={{
+          mb: 3,
+          fontWeight: 'bold',
+          color: theme.palette.text.primary
+        }}
+      >
+        User Activity Logs
+      </Typography>
 
       {/* Stats Cards */}
       <Box
-        mt="20px"
-        mb="40px"
-        display="grid"
-        gridTemplateColumns="repeat(auto-fit, minmax(240px, 1fr))"
-        gap="20px"
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+          gap: 3,
+          mb: 4
+        }}
       >
-        {['Error', 'Warning', 'Info', 'Success'].map((type) => (
+        {Object.entries(actionTypes).map(([key, type]) => (
           <Card
             key={type}
+            elevation={2}
             sx={{
-              backgroundColor: colors.primary[400],
-              ':hover': { backgroundColor: colors.primary[300] },
-              transition: 'background-color 0.3s'
+              bgcolor: alpha(theme.palette.background.paper, 0.9),
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: theme.shadows[8]
+              }
             }}
           >
             <CardContent>
               <Stack direction="row" spacing={2} alignItems="center">
                 <Box
                   sx={{
-                    backgroundColor: getSeverityColor(type),
+                    bgcolor: alpha(getActionColor(type), 0.1),
                     borderRadius: '50%',
                     p: 1,
-                    display: 'flex'
+                    display: 'flex',
+                    color: getActionColor(type)
                   }}
                 >
-                  {getSeverityIcon(type)}
+                  {getActionIcon(type)}
                 </Box>
                 <Box>
-                  <Typography variant="h4" color={colors.grey[100]}>
-                    {logs.filter(log => log.severity === type.toLowerCase()).length}
+                  <Typography variant="h5" color="text.primary">
+                    {logs.filter(log => log.action === type).length}
                   </Typography>
-                  <Typography variant="body2" color={colors.grey[300]}>
-                    {type} Logs
+                  <Typography variant="body2" color="text.secondary" sx={{ textTransform: 'capitalize' }}>
+                    {type} Actions
                   </Typography>
                 </Box>
               </Stack>
@@ -161,8 +201,8 @@ const Logging = () => {
         ))}
       </Box>
 
-      {/* Search and Filter Bar */}
-      <Box mb="20px" display="flex" justifyContent="space-between" alignItems="center">
+      {/* Search Bar */}
+      <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
         <TextField
           variant="outlined"
           size="small"
@@ -170,44 +210,22 @@ const Logging = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           sx={{
-            backgroundColor: colors.primary[400],
-            borderRadius: '4px',
-            width: '300px',
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                borderColor: colors.grey[500],
-              },
-              '&:hover fieldset': {
-                borderColor: colors.grey[300],
-              },
-            },
+            flexGrow: 1,
+            maxWidth: 300,
+            bgcolor: theme.palette.background.paper,
           }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <Search sx={{ color: colors.grey[300] }} />
+                <Search color="action" />
               </InputAdornment>
             ),
           }}
         />
-        <IconButton
-          sx={{
-            backgroundColor: colors.primary[400],
-            '&:hover': { backgroundColor: colors.primary[300] },
-          }}
-        >
-          <FilterList />
-        </IconButton>
       </Box>
 
       {/* Logs Table */}
-      <Paper
-        sx={{
-          backgroundColor: colors.primary[400],
-          borderRadius: '8px',
-          overflow: 'hidden'
-        }}
-      >
+      <Paper elevation={3} sx={{ bgcolor: theme.palette.background.paper }}>
         {loading ? (
           <Box sx={{ width: '100%', p: 2 }}>
             <LinearProgress />
@@ -215,44 +233,80 @@ const Logging = () => {
         ) : (
           <Fade in={!loading}>
             <TableContainer>
-              <Table sx={{ minWidth: 650 }}>
+              <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ color: colors.grey[100], fontWeight: 'bold' }}>Timestamp</TableCell>
-                    <TableCell sx={{ color: colors.grey[100], fontWeight: 'bold' }}>Severity</TableCell>
-                    <TableCell sx={{ color: colors.grey[100], fontWeight: 'bold' }}>Source</TableCell>
-                    <TableCell sx={{ color: colors.grey[100], fontWeight: 'bold' }}>Message</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Time</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>User</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Action</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Element</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Path</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {filteredLogs
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((log, index) => (
+                    .map((log) => (
                       <TableRow
-                        key={index}
+                        key={log.id}
                         sx={{
-                          '&:hover': { backgroundColor: colors.primary[300] },
-                          transition: 'background-color 0.3s'
+                          '&:hover': { bgcolor: alpha(theme.palette.action.hover, 0.1) },
+                          transition: 'background-color 0.2s'
                         }}
                       >
-                        <TableCell sx={{ color: colors.grey[100] }}>
+                        <TableCell>
                           {new Date(log.timestamp).toLocaleString()}
                         </TableCell>
                         <TableCell>
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <Tooltip title={`${log.user.role}`}>
+                              <Avatar
+                                sx={{
+                                  width: 30,
+                                  height: 30,
+                                  bgcolor: getActionColor(log.action),
+                                  fontSize: '0.875rem'
+                                }}
+                              >
+                                {log.user.initials}
+                              </Avatar>
+                            </Tooltip>
+                            <Box>
+                              <Typography variant="body2">{log.user.name}</Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {log.user.email}
+                              </Typography>
+                            </Box>
+                          </Stack>
+                        </TableCell>
+                        <TableCell>
                           <Chip
-                            icon={getSeverityIcon(log.severity)}
-                            label={log.severity}
+                            icon={getActionIcon(log.action)}
+                            label={log.action}
+                            size="small"
                             sx={{
-                              backgroundColor: getSeverityColor(log.severity),
-                              color: '#fff',
+                              bgcolor: alpha(getActionColor(log.action), 0.1),
+                              color: getActionColor(log.action),
+                              textTransform: 'capitalize',
                               '& .MuiChip-icon': {
-                                color: '#fff'
+                                color: 'inherit'
                               }
                             }}
                           />
                         </TableCell>
-                        <TableCell sx={{ color: colors.grey[100] }}>{log.source}</TableCell>
-                        <TableCell sx={{ color: colors.grey[100] }}>{log.message}</TableCell>
+                        <TableCell>{log.element}</TableCell>
+                        <TableCell>
+                          <Tooltip title={log.url}>
+                            <Typography variant="body2" sx={{ 
+                              maxWidth: 200,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }}>
+                              {log.path}
+                            </Typography>
+                          </Tooltip>
+                        </TableCell>
                       </TableRow>
                     ))}
                 </TableBody>
@@ -268,17 +322,10 @@ const Logging = () => {
           page={page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
-          sx={{
-            color: colors.grey[100],
-            borderTop: `1px solid ${colors.grey[800]}`,
-            '& .MuiTablePagination-selectIcon': {
-              color: colors.grey[100]
-            }
-          }}
         />
       </Paper>
     </Box>
   );
 };
 
-export default Logging;
+export default UserActivityLogging;

@@ -275,6 +275,7 @@ function App() {
         },
       });
       const data = await response.json();
+      console.log(data)
       setUserInfo(data);
       if (data.organisation) {
         localStorage.setItem('organization', data.organisation);
@@ -475,7 +476,7 @@ function App() {
               <Route
                 path="/management/*"
                 element={
-                  <ProtectedRoute allowedRoles={['reader', 'writer']}>
+                  <ProtectedRoute allowedRoles={['reader', 'writer','admin']}>
                     <Routes>
                       <Route path="/" element={<Management />} />
                       <Route path="details/:source" element={<ManagementDetails />} />
@@ -502,7 +503,7 @@ function App() {
               <Route
                 path="/technical/*"
                 element={
-                  <ProtectedRoute allowedRoles={['reader', 'writer', 'infocare-admin']}>
+                  <ProtectedRoute allowedRoles={['reader', 'writer', 'admin']}>
                     <Routes>
                       <Route path="/" element={<Technical />} />
                       <Route path="details/:databaseName" element={<TechnicalDetails />} />
@@ -519,7 +520,7 @@ function App() {
               <Route
                 path="/users"
                 element={
-                  <ProtectedRoute allowedRoles={['writer', 'infocare-admin']}>
+                  <ProtectedRoute allowedRoles={['writer', 'admin']}>
                     <Users />
                   </ProtectedRoute>
                 }
@@ -528,7 +529,7 @@ function App() {
               <Route
                 path="/form"
                 element={
-                  <ProtectedRoute allowedRoles={['writer', 'infocare-admin']}>
+                  <ProtectedRoute allowedRoles={['writer', 'admin']}>
                     <Form />
                   </ProtectedRoute>
                 }
@@ -537,7 +538,7 @@ function App() {
               <Route
                 path="/logging"
                 element={
-                  <ProtectedRoute allowedRoles={['writer', 'infocare-admin']}>
+                  <ProtectedRoute allowedRoles={['writer', 'admin']}>
                     <Logging />
                   </ProtectedRoute>
                 }
@@ -547,7 +548,7 @@ function App() {
               <Route
                 path="/map"
                 element={
-                  <ProtectedRoute allowedRoles={['writer']}>
+                  <ProtectedRoute allowedRoles={['writer', 'reader', 'admin']}>
                     <Maps />
                   </ProtectedRoute>
                 }
@@ -556,7 +557,7 @@ function App() {
               <Route
                 path="/clients"
                 element={
-                  <ProtectedRoute allowedRoles={['admin' , 'infocare-admin']}>
+                  <ProtectedRoute allowedRoles={['admin']}>
                     <Clients />
                   </ProtectedRoute>
                 }

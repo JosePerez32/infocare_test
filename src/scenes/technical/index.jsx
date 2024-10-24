@@ -19,7 +19,7 @@ const Technical = () => {
   useEffect(() => {
     const fetchSourceData = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('accessToken');
         const response = await fetch(`${process.env.REACT_APP_API_URL}/dashboards/${organization}/technical/sources`, {
           method: 'GET',
           headers: {
