@@ -28,9 +28,9 @@ import Users from "./scenes/users";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Unauthorized from "./components/Unauthorized";
 import Technical from "./scenes/technical";
-import Form from "./scenes/form";
+import CreateUser from "./scenes/users/createUser";
 import Maps from "./scenes/map/map";
-import Logging from './scenes/infocare-inhouse/logging';
+import Logging from './scenes/logging/logging';
 import ManagementDetails from './scenes/management/management_details';
 import TechnicalDetails from './scenes/technical/technical_details';
 import Recovery from './scenes/management/recovery';
@@ -53,7 +53,7 @@ import ResponsivenessSpace from './scenes/management/responsiveness_space';
 import ResponsivenessSpeed from './scenes/management/responsiveness_speed';
 import ResponsivenessReadyness from './scenes/management/responsiveness_readyness';
 import Calendar from "./scenes/calendar/calendar";
-import Clients from "./scenes/infocare-inhouse/clients";
+import Clients from "./scenes/clients/clients";
 
 
 const loginTheme = createTheme({
@@ -481,7 +481,7 @@ function App() {
                       <Route path="/" element={<Management />} />
                       <Route path="details/:source" element={<ManagementDetails />} />
                       <Route path="details/:databaseName/responsiveness" element={<Responsiveness />} />
-                      <Route path="details/:databaseName/responsiveness/cpu" element={<ResponsivenessCpu />} />
+                      <Route path="details/:source/responsiveness/cpu" element={<ResponsivenessCpu />} />
                       <Route path="details/:databaseName/responsiveness/memory" element={<ResponsivenessMemory />} />
                       <Route path="details/:databaseName/responsiveness/space" element={<ResponsivenessSpace />} />
                       <Route path="details/:databaseName/responsiveness/speed" element={<ResponsivenessSpeed />} />
@@ -527,10 +527,10 @@ function App() {
               />
               
               <Route
-                path="/form"
+                path="/createUser"
                 element={
                   <ProtectedRoute allowedRoles={['writer', 'admin']}>
-                    <Form />
+                    <CreateUser />
                   </ProtectedRoute>
                 }
               />

@@ -9,7 +9,8 @@ import {
   useTheme,
   Tooltip,
   Chip,
-  Breadcrumbs
+  Breadcrumbs,
+  ListItemButton
 } from "@mui/material";
 import { ColorModeContext } from "../../theme";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
@@ -19,19 +20,16 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import PersonIcon from '@mui/icons-material/Person';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useLocation, Link as RouterLink } from 'react-router-dom';
-import { tokens } from "../../theme";
 import Link from '@mui/material/Link';
 import CreateIcon from '@mui/icons-material/Create';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-  
 
 const Topbar = ({ userName, userInfo, setIsSidebar, onLogout }) => {
   const theme = useTheme();
   const colorMode = useContext(ColorModeContext);
-  const colors = tokens(theme.palette.mode);
   const location = useLocation();
-  const userRole = userInfo?.role 
-  const organization = userInfo?.organisation 
+  const userRole = userInfo?.role;
+  const organization = userInfo?.organisation;
 
   const breadcrumbNameMap = {
     '/': 'Home',
@@ -88,68 +86,122 @@ const Topbar = ({ userName, userInfo, setIsSidebar, onLogout }) => {
 
   const combinedPathnames = getCombinedBreadcrumbs();
 
-  const handleLogout = () => {
-    onLogout();
-  };
-  
+  const IconButtonWrapper = ({ children, title, onClick }) => (
+    <ListItemButton
+      onClick={onClick}
+      sx={{
+        my: 0.5,
+        mx: 0.5,
+        borderRadius: 2,
+        width: 'auto',
+        minWidth: 'auto',
+        padding: '8px',
+        "&:hover": {
+          bgcolor: "rgba(113, 216, 189, 0.1)",
+        },
+        "&.Mui-selected": {
+          bgcolor: "rgba(113, 216, 189, 0.2)",
+          "&:hover": {
+            bgcolor: "rgba(113, 216, 189, 0.3)",
+          },
+        },
+      }}
+    >
+      <Tooltip title={title}>
+        <IconButton
+          color="inherit"
+          sx={{
+            color: theme.palette.mode === "dark" ? "inherit" : "inherit",
+            "&:hover": { color: "#71D8BD" },
+          }}
+        >
+          {children}
+        </IconButton>
+      </Tooltip>
+    </ListItemButton>
+  );
+
   const getRoleChip = () => {
     const role = userRole?.toLowerCase();
-  
+    
     let icon = <PersonIcon />;
     let label = 'Normal User';
-    let color = 'primary';
-  
+    
     if (role.includes('admin')) {
       icon = <AdminPanelSettingsIcon />;
       label = 'Admin';
-      color = 'secondary';
     } else if (role.includes('writer')) {
       icon = <CreateIcon />;
       label = 'Writer';
-      color = 'primary';
     } else if (role.includes('reader')) {
       icon = <VisibilityIcon />;
       label = 'Reader';
-      color = 'primary';
     }
-  
+    
     return (
       <Chip
         icon={icon}
         label={label}
-        color={color}
-        sx={{ ml: 2 }}
+        sx={{
+          ml: 2,
+          bgcolor: 'rgba(113, 216, 189, 0.1)',
+          color: theme.palette.text.primary,
+          '& .MuiChip-icon': {
+            color: '#71D8BD',
+          },
+          border: '1px solid rgba(113, 216, 189, 0.2)',
+        }}
       />
     );
   };
-  
 
   const getOrganizationChip = () => {
     if (organization) {
       return (
         <Chip
           label={organization}
-          color="info"
-          sx={{ ml: 2 }}
+          sx={{
+            ml: 2,
+            bgcolor: 'rgba(113, 216, 189, 0.1)',
+            color: theme.palette.text.primary,
+            border: '1px solid rgba(113, 216, 189, 0.2)',
+          }}
         />
       );
     }
     return null;
   };
 
+  const handleLogout = () => {
+    onLogout();
+  };
+
   return (
     <AppBar 
       position="static" 
-      color="default" 
-      elevation={20}
+      elevation={0}
       sx={{
-        background: `${colors.primary[400]} !important`,
-        color: theme.palette.text.primary,
+        background: theme.palette.mode === "dark" ? "#1F2A40" : "#fcfcfc",
+        borderBottom: `1px solid ${theme.palette.divider}`,
       }}
     >
       <Toolbar sx={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
-          <Breadcrumbs aria-label="breadcrumb" sx={{ flexGrow: 1 }}>
+          <Breadcrumbs 
+            aria-label="breadcrumb" 
+            sx={{ 
+              flexGrow: 1,
+              '& .MuiLink-root': {
+                color: theme.palette.text.primary,
+                '&:hover': {
+                  color: '#71D8BD',
+                }
+              },
+              '& .MuiTypography-root': {
+                color: '#71D8BD',
+              }
+            }}
+          >
             <Link component={RouterLink} underline="hover" color="inherit" to="/">
               {breadcrumbNameMap['/']}
             </Link>
@@ -163,43 +215,50 @@ const Topbar = ({ userName, userInfo, setIsSidebar, onLogout }) => {
                 </Typography>
               ) : (
                 <Link
-                  component={RouterLink}
-                  underline="hover"
-                  color="inherit"
-                  to={to}
-                  key={to}
-                >
-                  {getBreadcrumbName(location.pathname, value, index, combinedPathnames)}
-                </Link>
+                component={RouterLink}
+                underline="hover"
+                color="inherit"
+                to={to}
+                state={{ organization }} // Add this line
+                key={to}
+              >
+                {getBreadcrumbName(location.pathname, value, index, combinedPathnames)}
+              </Link>
               );
             })}
           </Breadcrumbs>
         </Box>
         
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Tooltip title="Toggle color mode">
-            <IconButton onClick={colorMode.toggleColorMode} color="inherit">
-              {theme.palette.mode === "dark" ? <LightModeOutlinedIcon /> : <DarkModeOutlinedIcon />}
-            </IconButton>
-          </Tooltip>
+          <IconButtonWrapper title="Toggle color mode" onClick={colorMode.toggleColorMode}>
+            {theme.palette.mode === "dark" ? <LightModeOutlinedIcon /> : <DarkModeOutlinedIcon />}
+          </IconButtonWrapper>
           
-          <Tooltip title="Settings">
-            <IconButton color="inherit">
-              <SettingsOutlinedIcon />
-            </IconButton>
-          </Tooltip>
+          <IconButtonWrapper title="Settings">
+            <SettingsOutlinedIcon />
+          </IconButtonWrapper>
           
           {userInfo && getOrganizationChip()}
           {userRole && getRoleChip()}
 
           {userName && (
             <Chip
-              avatar={<Avatar sx={{ bgcolor: theme.palette.primary.main }}>{userName.charAt(0).toUpperCase()}</Avatar>}
+              avatar={
+                <Avatar 
+                  sx={{ 
+                    bgcolor: 'rgba(113, 216, 189, 0.2)',
+                    color: '#71D8BD',
+                  }}
+                >
+                  {userName.charAt(0).toUpperCase()}
+                </Avatar>
+              }
               label={userName}
-              variant="outlined"
               sx={{
                 ml: 2,
-                borderColor: 'transparent',
+                bgcolor: 'rgba(113, 216, 189, 0.1)',
+                color: theme.palette.text.primary,
+                border: '1px solid rgba(113, 216, 189, 0.2)',
                 '& .MuiChip-label': {
                   color: theme.palette.text.primary,
                 },
@@ -207,11 +266,9 @@ const Topbar = ({ userName, userInfo, setIsSidebar, onLogout }) => {
             />
           )}
           
-          <Tooltip title="Logout">
-            <IconButton color="inherit" onClick={handleLogout} sx={{ ml: 2 }}>
-              <LogoutIcon />
-            </IconButton>
-          </Tooltip>
+          <IconButtonWrapper title="Logout" onClick={handleLogout}>
+            <LogoutIcon />
+          </IconButtonWrapper>
         </Box>
       </Toolbar>
     </AppBar>

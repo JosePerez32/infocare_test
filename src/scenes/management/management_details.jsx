@@ -8,23 +8,41 @@ import { useParams, useLocation, useNavigate } from "react-router-dom";
 const ManagementDetails = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const { organization } = useLocation().state || {};
+  const location = useLocation();
   const navigate = useNavigate();
   const [detailsData, setDetailsData] = useState(null);
-  const { source } = useParams(); // Retrieve source from the URL parameters
+  const { source } = useParams();
   const [gaugeOrder, setGaugeOrder] = useState(["responsiveness", "security", "recovery"]);
   const [alertVisible, setAlertVisible] = useState(false);
 
+  // Get organization from state or localStorage
+  const getOrganization = () => {
+    if (location.state?.organization) {
+      // Save to localStorage when we have it from state
+      localStorage.setItem('currentOrganization', location.state.organization);
+      return location.state.organization;
+    }
+    // Fallback to localStorage if not in state
+    return localStorage.getItem('currentOrganization');
+  };
+
+  const organization = getOrganization();
+
   useEffect(() => {
     const fetchDetailsData = async () => {
+      if (!organization) {
+        console.error("No organization found");
+        return;
+      }
+
       try {
-        const token = localStorage.getItem('accessToken'); // Retrieve token from localStorage
+        const token = localStorage.getItem('accessToken');
 
         const response = await fetch(
-          `${process.env.REACT_APP_API_URL}/dashboards/${organization}/management/sources/${source}`, 
+          `${process.env.REACT_APP_API_URL}/dashboards/${organization}/management/sources/${source}`,
           {
             headers: {
-              'Authorization': `Bearer ${token}`, // Add token to Authorization header
+              'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json',
             },
           }
@@ -46,7 +64,9 @@ const ManagementDetails = () => {
   }, [organization, source]);
 
   const handleBoxClick = (route) => {
-    navigate(`/management/details/${source}/${route}`);
+    navigate(`/management/details/${source}/${route}`, {
+      state: { organization } // Pass organization in state for forward navigation
+    });
   };
 
   const handleDragStart = (index) => {
@@ -58,19 +78,19 @@ const ManagementDetails = () => {
   const handleDrop = (index) => {
     return (event) => {
       event.preventDefault();
-      const fromIndex = event.dataTransfer.getData("text/plain");
+      const fromIndex = parseInt(event.dataTransfer.getData("text/plain"));
       const newOrder = [...gaugeOrder];
       const [movedItem] = newOrder.splice(fromIndex, 1);
       newOrder.splice(index, 0, movedItem);
       setGaugeOrder(newOrder);
       localStorage.setItem(`gaugeOrder_${source}`, JSON.stringify(newOrder));
       setAlertVisible(true);
-      setTimeout(() => setAlertVisible(false), 3000); // Hide alert after 3 seconds
+      setTimeout(() => setAlertVisible(false), 3000);
     };
   };
 
   const handleDragOver = (event) => {
-    event.preventDefault(); // Allow the drop
+    event.preventDefault();
   };
 
   const GaugeBox = ({ title, value, route, index }) => (
@@ -103,6 +123,7 @@ const ManagementDetails = () => {
     </Box>
   );
 
+  if (!organization) return <Typography>No organization selected</Typography>;
   if (!detailsData) return <Typography>Loading...</Typography>;
 
   return (
@@ -113,10 +134,10 @@ const ManagementDetails = () => {
         {gaugeOrder.map((gauge, index) => (
           <GaugeBox
             key={gauge}
-            title={gauge.charAt(0).toUpperCase() + gauge.slice(1)} // Capitalize the first letter
+            title={gauge.charAt(0).toUpperCase() + gauge.slice(1)}
             value={detailsData[gauge]}
             route={gauge}
-            index={index} // Pass index to GaugeBox
+            index={index}
           />
         ))}
       </Box>
