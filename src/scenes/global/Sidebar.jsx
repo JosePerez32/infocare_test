@@ -36,7 +36,7 @@ const SectionTitle = ({ title, isCollapsed }) => {
   );
 };
 
-const MenuItem = ({ title, to, icon, selected, setSelected, children }) => {
+const MenuItem = ({ title, to, icon, selected, setSelected, children, isCollapsed }) => {
   const [open, setOpen] = useState(false);
   const hasChildren = Boolean(children);
 
@@ -60,6 +60,7 @@ const MenuItem = ({ title, to, icon, selected, setSelected, children }) => {
             my: 0.5,
             mx: 1,
             borderRadius: 2,
+            justifyContent: isCollapsed ? 'center' : 'flex-start',
             "&:hover": {
               bgcolor: "rgba(113, 216, 189, 0.1)",
             },
@@ -73,25 +74,31 @@ const MenuItem = ({ title, to, icon, selected, setSelected, children }) => {
         >
           <ListItemIcon
             sx={{
-              minWidth: 40,
+              minWidth: isCollapsed ? 0 : 40,
+              mr: isCollapsed ? 0 : 2,
+              justifyContent: 'center',
               color: selected === title ? "#71D8BD" : "inherit",
             }}
           >
             {icon}
           </ListItemIcon>
-          <ListItemText 
-            primary={title}
-            sx={{
-              "& .MuiTypography-root": {
-                fontWeight: selected === title ? 600 : 400,
-                color: selected === title ? "#71D8BD" : "inherit",
-              },
-            }}
-          />
-          {hasChildren && (open ? <ExpandLess /> : <ExpandMore />)}
+          {!isCollapsed && (
+            <>
+              <ListItemText 
+                primary={title}
+                sx={{
+                  "& .MuiTypography-root": {
+                    fontWeight: selected === title ? 600 : 400,
+                    color: selected === title ? "#71D8BD" : "inherit",
+                  },
+                }}
+              />
+              {hasChildren && (open ? <ExpandLess /> : <ExpandMore />)}
+            </>
+          )}
         </ListItemButton>
       </ListItem>
-      {hasChildren && (
+      {!isCollapsed && hasChildren && (
         <Collapse in={open} timeout="auto" unmountOnExit>
           <List component="div" disablePadding sx={{ pl: 4 }}>
             {children}
@@ -141,38 +148,36 @@ const Sidebar = () => {
         }}
       >
         {!isCollapsed && (
-          <>
-            <Box display="flex" alignItems="center" gap={1}>
-              <Avatar
-                src="./assets/Watermark_Project_rechts_24pxPNG.png"
-                alt="Infocare Logo"
-                sx={{ width: 32, height: 32 }}
-              />
-              <Typography
-                variant="h6"
-                sx={{
-                  background: "linear-gradient(45deg, #71D8BD 30%, #4FB3A0 90%)",
-                  backgroundClip: "text",
-                  textFillColor: "transparent",
-                  fontWeight: 600,
-                }}
-              >
-                Infocare
-              </Typography>
-              <Chip
-                label="v2.0"
-                size="small"
-                sx={{
-                  ml: 1,
-                  bgcolor: '#71D8BD',
-                  color: 'white',
-                  fontWeight: 600,
-                  fontSize: '0.75rem',
-                  height: '20px',
-                }}
-              />
-            </Box>
-          </>
+          <Box display="flex" alignItems="center" gap={1}>
+            <Avatar
+              src="./assets/Watermark_Project_rechts_24pxPNG.png"
+              alt="Infocare Logo"
+              sx={{ width: 32, height: 32 }}
+            />
+            <Typography
+              variant="h6"
+              sx={{
+                background: "linear-gradient(45deg, #71D8BD 30%, #4FB3A0 90%)",
+                backgroundClip: "text",
+                textFillColor: "transparent",
+                fontWeight: 600,
+              }}
+            >
+              Infocare
+            </Typography>
+            <Chip
+              label="v2.0"
+              size="small"
+              sx={{
+                ml: 1,
+                bgcolor: '#71D8BD',
+                color: 'white',
+                fontWeight: 600,
+                fontSize: '0.75rem',
+                height: '20px',
+              }}
+            />
+          </Box>
         )}
         <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
           <MenuOutlinedIcon />
@@ -189,6 +194,7 @@ const Sidebar = () => {
           icon={<HomeOutlinedIcon />}
           selected={selected}
           setSelected={setSelected}
+          isCollapsed={isCollapsed}
         />
 
         {hasAccess(["writer", "admin"]) && (
@@ -200,6 +206,7 @@ const Sidebar = () => {
               icon={<ManageAccountsIcon />}
               selected={selected}
               setSelected={setSelected}
+              isCollapsed={isCollapsed}
             />
             <MenuItem
               title="Technical View"
@@ -207,6 +214,7 @@ const Sidebar = () => {
               icon={<ContactsOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
+              isCollapsed={isCollapsed}
             />
             
             <SectionTitle title="Application" isCollapsed={isCollapsed} />
@@ -215,6 +223,7 @@ const Sidebar = () => {
               icon={<PeopleOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
+              isCollapsed={isCollapsed}
             >
               <MenuItem
                 title="Create User"
@@ -222,6 +231,7 @@ const Sidebar = () => {
                 icon={<GroupAddIcon />}
                 selected={selected}
                 setSelected={setSelected}
+                isCollapsed={isCollapsed}
               />
               <MenuItem
                 title="Users List"
@@ -229,6 +239,7 @@ const Sidebar = () => {
                 icon={<GroupIcon />}
                 selected={selected}
                 setSelected={setSelected}
+                isCollapsed={isCollapsed}
               />
             </MenuItem>
             <MenuItem
@@ -237,6 +248,7 @@ const Sidebar = () => {
               icon={<SchemaIcon />}
               selected={selected}
               setSelected={setSelected}
+              isCollapsed={isCollapsed}
             />
           </>
         )}
@@ -250,6 +262,7 @@ const Sidebar = () => {
               icon={<ContactsOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
+              isCollapsed={isCollapsed}
             />
             <MenuItem
               title="Management View"
@@ -257,6 +270,7 @@ const Sidebar = () => {
               icon={<ManageAccountsIcon />}
               selected={selected}
               setSelected={setSelected}
+              isCollapsed={isCollapsed}
             />
           </>
         )}
@@ -270,6 +284,7 @@ const Sidebar = () => {
               icon={<BookIcon />}
               selected={selected}
               setSelected={setSelected}
+              isCollapsed={isCollapsed}
             />
             <MenuItem
               title="Clients"
@@ -277,6 +292,7 @@ const Sidebar = () => {
               icon={<RecentActorsIcon />}
               selected={selected}
               setSelected={setSelected}
+              isCollapsed={isCollapsed}
             />
           </>
         )}
@@ -289,6 +305,7 @@ const Sidebar = () => {
           icon={<HelpOutlineOutlinedIcon />}
           selected={selected}
           setSelected={setSelected}
+          isCollapsed={isCollapsed}
         />
       </List>
     </Drawer>
