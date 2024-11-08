@@ -152,7 +152,7 @@ const Sidebar = () => {
             <Avatar
               src="./assets/Watermark_Project_rechts_24pxPNG.png"
               alt="Infocare Logo"
-              sx={{ width: 32, height: 32 }}
+              sx={{ width: 20, height: 20}}
             />
             <Typography
               variant="h6"

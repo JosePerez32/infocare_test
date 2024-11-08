@@ -152,7 +152,7 @@ const Dashboard = ({ accessToken }) => {
               }}
             >
               <img 
-                src="./assets/infoCare_Logo_v2.png" 
+                src="./assets/InfoCare_Logo_v2.png" 
                 alt="InfoCare Logo" 
                 style={{ 
                   maxWidth: '100%',
