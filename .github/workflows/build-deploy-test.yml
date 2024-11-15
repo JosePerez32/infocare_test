@@ -1,0 +1,23 @@
+on:
+    push:
+        branches:
+        - main
+        
+jobs:
+  build_push_image:
+    runs-on: [self-hosted]
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Run build with make
+        run: make build
+
+      - name: Tag image
+        run: make tag
+
+      - name: Push image
+        run: make push
+
+      - name: Restart kubernetes deployment
+        run: kubectl -n infocare-web rollout restart deployment infocare-web
