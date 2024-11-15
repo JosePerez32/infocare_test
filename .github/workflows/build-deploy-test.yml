@@ -20,4 +20,4 @@ jobs:
         run: make push
 
       - name: Restart kubernetes deployment
-        run: kubectl -n infocare-web rollout restart deployment infocare-web
+        run: kubectl -n infocare-web rollout restart deployment web-deployment
