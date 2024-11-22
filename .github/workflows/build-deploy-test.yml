@@ -1,8 +1,8 @@
 on:
-    push:
-        branches:
-        - main
-        
+  push:
+    branches:
+      - main
+
 jobs:
   build_push_image:
     runs-on: [self-hosted]
@@ -11,13 +11,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run build with make
-        run: make build
+        run: make build-k8s
 
       - name: Tag image
-        run: make tag
+        run: make tag-k8s
 
       - name: Push image
-        run: make push
+        run: make push-k8s
 
       - name: Restart kubernetes deployment
         run: kubectl -n infocare-web rollout restart deployment web-deployment
