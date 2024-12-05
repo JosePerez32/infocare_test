@@ -143,7 +143,6 @@ const Clients = () => {
                       {client.employees} employees
                     </Typography>
                   </Box>
-
                   <Typography
                     variant="body2"
                     color={colors.grey[300]}

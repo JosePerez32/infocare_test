@@ -14,7 +14,7 @@ import {
   LinearProgress,
   Fade,
 } from "@mui/material";
-import { Database, Shield, Activity, Cloud } from "lucide-react";
+import { Database, Shield, Activity, Cloud, Kanban } from "lucide-react";
 import { styled } from '@mui/material/styles';
 import logoImage from './images/Watermark_Project_rechts_24pxPNG.png';
 
@@ -54,6 +54,8 @@ import ResponsivenessSpeed from './scenes/management/responsiveness_speed';
 import ResponsivenessReadyness from './scenes/management/responsiveness_readyness';
 import Calendar from "./scenes/calendar/calendar";
 import Clients from "./scenes/clients/clients";
+import  UserIdleLogout  from './components/UserIdleLogout';
+
 
 
 const loginTheme = createTheme({
@@ -469,6 +471,7 @@ function App() {
               userInfo={userInfo}
               onLogout={logoutAction} 
             />
+            <UserIdleLogout timeout={1000000} onLogout={logoutAction} />
             <Routes>
               <Route path="/" element={<Dashboard accessToken={accessToken} />} />
               
@@ -482,7 +485,7 @@ function App() {
                       <Route path="details/:source" element={<ManagementDetails />} />
                       <Route path="details/:databaseName/responsiveness" element={<Responsiveness />} />
                       <Route path="details/:source/responsiveness/cpu" element={<ResponsivenessCpu />} />
-                      <Route path="details/:databaseName/responsiveness/memory" element={<ResponsivenessMemory />} />
+                      <Route path="details/:source/responsiveness/memory" element={<ResponsivenessMemory />} />
                       <Route path="details/:databaseName/responsiveness/space" element={<ResponsivenessSpace />} />
                       <Route path="details/:databaseName/responsiveness/speed" element={<ResponsivenessSpeed />} />
                       <Route path="details/:databaseName/responsiveness/readyness" element={<ResponsivenessReadyness />} />

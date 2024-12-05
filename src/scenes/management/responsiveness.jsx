@@ -57,7 +57,11 @@ const Responsiveness = () => {
 
   const ResponsivenessBox = ({ title, value, route }) => (
     <Box
-      onClick={() => navigate(`/management/details/${databaseName}/responsiveness/${route}`)}
+    onClick={() =>
+      navigate(`/management/details/${databaseName}/responsiveness/${route}`, {
+        state: { organization }
+      })
+    }
       style={{
         cursor: "pointer",
         backgroundColor: colors.primary[400],
